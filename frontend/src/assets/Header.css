@@ -1,0 +1,86 @@
+/* Overall Header Styling */
+.header {
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 10px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Logo Styling */
+.logo a {
+    font-size: 24px;
+    font-weight: bold;
+    color: #ff6347;
+    /* Coral color for branding */
+    text-decoration: none;
+}
+
+.logo a:hover {
+    color: #ff4500;
+}
+
+/* Navigation Links */
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    font-size: 16px;
+    color: #333;
+    transition: color 0.3s;
+}
+
+.nav-links a:hover {
+    color: #ff6347;
+}
+
+/* Cart and Auth Link Styling */
+.cart-count {
+    font-weight: bold;
+    color: #ff6347;
+}
+
+.auth-link {
+    cursor: pointer;
+    color: #333;
+    transition: color 0.3s;
+}
+
+.auth-link:hover {
+    color: #ff6347;
+}
+
+/* Welcome Message */
+.welcome-message {
+    margin-left: 15px;
+    font-size: 14px;
+    color: #555;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .header-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .nav-links {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from base.models import *
-from django.contrib.auth.models import User
+from base.models import Product, Category, SkinConcern, SkinType,User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -31,3 +31,32 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user        
+    
+
+class SkinConcernSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SkinConcern
+        fields = ['id', 'name', 'description'] 
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'name', 'description', 'slug', 'is_active']
+
+
+class ProductSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+
+    def get_image_url(self, obj):
+        request = self.context.get('request')  # Get the request context
+        if request and obj.image:
+            return request.build_absolute_uri(obj.image.url)  # Build the absolute URL
+        return None  # Return None if no image is found or request is not available
+
+    class Meta:
+        model = Product
+        fields = [
+            'id', 'name', 'description', 'price', 'discount_price', 'image', 'image_url',
+            'rating', 'stock', 'is_available', 'category', 'skin_type', 'skin_concerns',
+            'ingredients', 'usage_instructions', 'brand', 'created_at', 'updated_at'
+        ]

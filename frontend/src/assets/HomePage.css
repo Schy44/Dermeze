@@ -1,0 +1,206 @@
+/* HomePage.css */
+
+/* Global Styles */
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #333;
+    padding: 1rem 2rem;
+}
+
+.navbar-logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #fff;
+}
+
+.navbar-links {
+    list-style: none;
+    display: flex;
+    gap: 1.5rem;
+}
+
+.navbar-links li a {
+    color: #fff;
+    font-size: 1rem;
+}
+
+.navbar-links li a:hover {
+    color: #f7a440;
+}
+
+/* Profile Section */
+.profile-section {
+    text-align: center;
+    padding: 2rem;
+    /* Add some padding for spacing */
+    background-color: #f9f9f9;
+    /* Light background for contrast */
+}
+
+.profile-image {
+    width: 100%;
+    /* Make it responsive */
+    max-width: 200px;
+    /* Set a maximum width */
+    height: auto;
+    /* Maintain aspect ratio */
+    border-radius: 50%;
+    /* Optional: makes it a circle */
+    margin-bottom: 1rem;
+    /* Spacing below the image */
+}
+
+/* Hero Section */
+.hero-section {
+    background-image: url('https://via.placeholder.com/1920x500');
+    /* Update with your image URL */
+    background-size: cover;
+    background-position: center;
+    height: 70vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    text-align: center;
+}
+
+.hero-content h1 {
+    font-size: 2.5rem;
+    /* Adjust font size */
+    margin-bottom: 1rem;
+}
+
+.hero-content p {
+    font-size: 1.25rem;
+    /* Adjust font size */
+    margin-bottom: 2rem;
+}
+
+.shop-now-button {
+    padding: 1rem 2rem;
+    background-color: #f7a440;
+    color: white;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.shop-now-button:hover {
+    background-color: #333;
+}
+
+/* Featured Products Section */
+.featured-products {
+    padding: 2rem;
+    text-align: center;
+}
+
+.featured-products h2 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+}
+
+.products-grid {
+    display: flex;
+    flex-wrap: wrap;
+    /* Allow wrapping for responsiveness */
+    justify-content: center;
+    gap: 2rem;
+}
+
+.product-card {
+    background-color: #f9f9f9;
+    padding: 1rem;
+    border-radius: 10px;
+    width: 200px;
+    /* Fixed width for product cards */
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.product-card img {
+    width: 100%;
+    height: auto;
+    border-radius: 5px;
+}
+
+.product-card h3 {
+    margin-top: 1rem;
+    font-size: 1.2rem;
+}
+
+.product-card p {
+    color: #333;
+    font-weight: bold;
+    margin-top: 0.5rem;
+}
+
+/* Footer */
+.footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 1rem;
+    margin-top: 2rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .navbar-links {
+        flex-direction: column;
+        /* Stack links vertically on smaller screens */
+    }
+
+    .hero-content h1 {
+        font-size: 2rem;
+        /* Smaller heading */
+    }
+
+    .hero-content p {
+        font-size: 1rem;
+        /* Smaller paragraph */
+    }
+
+    .products-grid {
+        flex-direction: column;
+        /* Stack products vertically */
+        align-items: center;
+        /* Center items */
+    }
+
+    .product-card {
+        width: 90%;
+        /* Use more width on smaller screens */
+    }
+
+    .profile-image {
+        max-width: 150px;
+        /* Adjust max width for smaller screens */
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-content h1 {
+        font-size: 1.5rem;
+        /* Smaller heading */
+    }
+
+    .hero-content p {
+        font-size: 0.9rem;
+        /* Smaller paragraph */
+    }
+}
