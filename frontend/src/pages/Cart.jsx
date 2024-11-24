@@ -1,175 +1,92 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react'; // Added useContext here
 import { useCart } from '../context/CartContext';
-import { useWishlist } from '../context/WishlistContext';
-import '../assets/Cart.css';
+import { useNavigate } from 'react-router-dom';
+import AuthContext from '../context/AuthContext'; // Import AuthContext for the token
+import '../assets/cart.css';
 
 const Cart = () => {
-    const { cartItems, removeFromCart, updateQuantity } = useCart();
-    const { addToWishlist } = useWishlist();
+    const { authTokens } = useContext(AuthContext); // Access authTokens
+    const navigate = useNavigate();
+    const { cartItems, removeFromCart, updateQuantity, getTotal } = useCart();
     const [couponCode, setCouponCode] = useState('');
-    const [couponDiscount, setCouponDiscount] = useState(0);
-    const [customerDetails, setCustomerDetails] = useState({
-        fullName: '',
-        primaryPhone: '',
-        secondaryPhone: '',
-        email: '',
-        street: '',
-        city: '',
-        state: '',
-        zip: '',
-        country: '',
-        landmark: '',
-        preferredDate: '',
-        timeSlot: '',
-        instructions: '',
-        paymentMethod: 'COD',
-        billingAddress: '',
-        notificationMethod: 'email',
-    });
+    const [discount, setDiscount] = useState(0);
+    const [couponError, setCouponError] = useState('');
 
-    const handleCouponApply = () => {
-        if (couponCode === 'SAVE10') {
-            setCouponDiscount(10);
+    const handleCouponSubmit = (e) => {
+        e.preventDefault();
+        if (couponCode === 'DISCOUNT10') {
+            setDiscount(10);
+            setCouponError('');
         } else {
-            setCouponDiscount(0);
+            setDiscount(0);
+            setCouponError('Invalid coupon code');
         }
     };
 
-    const handleAddToWishlist = (item) => {
-        addToWishlist(item);
-    };
+    const totalPrice = getTotal();
+    const finalPrice = totalPrice - (totalPrice * (discount / 100));
 
-    const calculateSubtotal = () => {
-        return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
-    };
+    const handleCheckout = () => {
+        if (cartItems.length === 0) {
+            alert('Your cart is empty!');
+            return;
+        }
 
-    const calculateDiscount = () => {
-        return (calculateSubtotal() * couponDiscount) / 100;
-    };
+        // Ensure the user is logged in
+        if (!authTokens) {
+            alert('You are not logged in.');
+            navigate('/login'); // Redirect to login if no token
+            return;
+        }
 
-    const calculateVAT = () => {
-        return calculateSubtotal() * 0.15;
-    };
+        // Map cart items to the required format for the backend
+        const orderItems = cartItems.map((item) => ({
+            product_id: item.id, // Ensure this field matches what your backend expects
+            quantity: item.quantity,
+        }));
 
-    const calculateTotal = () => {
-        const subtotal = calculateSubtotal();
-        const discount = calculateDiscount();
-        const vat = calculateVAT();
-        const deliveryCharge = 5;
-        return subtotal - discount + vat + deliveryCharge;
-    };
-
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setCustomerDetails(prevDetails => ({ ...prevDetails, [name]: value }));
-    };
-
-    const handleOrderConfirmation = () => {
-        alert('Order confirmed!');
+        navigate('/checkoutpage', { state: { cart_items: orderItems } });
     };
 
     return (
-        <div className="cart">
+        <div className="cart-container">
+            <h2>Your Cart</h2>
             {cartItems.length === 0 ? (
                 <p>Your cart is empty.</p>
             ) : (
-                <div className="cart-content">
-                    {/* Left side: Cart items, summary, and delivery preferences */}
-                    <div className="cart-items-summary">
-                        <div className="cart-items">
-                            {cartItems.map(item => (
-                                <div key={item.id} className="cart-item">
-                                    <img src={item.image} alt={item.name} className="cart-item-image" />
-                                    <div className="cart-item-details">
-                                        <h4>{item.name}</h4>
-                                        <p>${item.price} x {item.quantity}</p>
-                                        <input
-                                            type="number"
-                                            min="1"
-                                            value={item.quantity}
-                                            onChange={(e) => updateQuantity(item.id, parseInt(e.target.value))}
-                                            className="quantity-input"
-                                        />
-                                        <button onClick={() => removeFromCart(item.id)}>Remove</button>
-                                        <button onClick={() => handleAddToWishlist(item)} className="wishlist-button">Add to Wishlist</button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                <>
+                    <ul>
+                        {cartItems.map((item) => (
+                            <li key={item.id}>
+                                {item.name} x {item.quantity} - ${item.price * item.quantity}
+                                <button onClick={() => removeFromCart(item.id)}>Remove</button>
+                                <button onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</button>
+                                <button onClick={() => updateQuantity(item.id, item.quantity - 1)}>-</button>
+                            </li>
+                        ))}
+                    </ul>
 
-                        <div className="price-details">
-                            <div className="price-item"><span>Subtotal</span><span>${calculateSubtotal().toFixed(2)}</span></div>
-                            <div className="price-item"><span>Discount</span><span>-${calculateDiscount().toFixed(2)}</span></div>
-                            <div className="price-item"><span>VAT (15%)</span><span>${calculateVAT().toFixed(2)}</span></div>
-                            <div className="price-item"><span>Delivery Charge</span><span>$5.00</span></div>
-                            <div className="price-item"><span>Total</span><span>${calculateTotal().toFixed(2)}</span></div>
-                        </div>
-                        <div className="coupon-container">
-                            <input
-                                type="text"
-                                placeholder="Enter Coupon Code"
-                                value={couponCode}
-                                onChange={(e) => setCouponCode(e.target.value)}
-                            />
-                            <button onClick={handleCouponApply}>Apply</button>
-                        </div>
+                    <div className="cart-summary">
+                        <h3>Subtotal: ${totalPrice.toFixed(2)}</h3>
+                        <h3>Discount: {discount}%</h3>
+                        <h3>Final Price: ${finalPrice.toFixed(2)}</h3>
                     </div>
 
-                    {/* Right side: Customer details, delivery address, and payment */}
-                    <div className="customer-details">
-                        <h3>Customer Details</h3>
+                    <form onSubmit={handleCouponSubmit}>
                         <input
                             type="text"
-                            name="fullName"
-                            placeholder="Full Name"
-                            value={customerDetails.fullName}
-                            onChange={handleInputChange}
+                            value={couponCode}
+                            onChange={(e) => setCouponCode(e.target.value)}
+                            placeholder="Enter coupon code"
                         />
-                        <input
-                            type="tel"
-                            name="primaryPhone"
-                            placeholder="Primary Phone"
-                            value={customerDetails.primaryPhone}
-                            onChange={handleInputChange}
-                        />
-                        <input
-                            type="tel"
-                            name="secondaryPhone"
-                            placeholder="Secondary Phone"
-                            value={customerDetails.secondaryPhone}
-                            onChange={handleInputChange}
-                        />
-                        <input
-                            type="email"
-                            name="email"
-                            placeholder="Email Address"
-                            value={customerDetails.email}
-                            onChange={handleInputChange}
-                        />
+                        <button type="submit">Apply Coupon</button>
+                    </form>
+                    {couponError && <p className="error-message">{couponError}</p>}
 
-                        <h3>Delivery Address</h3>
-                        <input type="text" name="street" placeholder="Street Address" value={customerDetails.street} onChange={handleInputChange} />
-                        <input type="text" name="city" placeholder="City" value={customerDetails.city} onChange={handleInputChange} />
-                        <input type="text" name="state" placeholder="State/Province" value={customerDetails.state} onChange={handleInputChange} />
-                        <input type="text" name="zip" placeholder="ZIP/Postal Code" value={customerDetails.zip} onChange={handleInputChange} />
-                        <input type="text" name="country" placeholder="Country" value={customerDetails.country} onChange={handleInputChange} />
-                        <input type="text" name="landmark" placeholder="Landmark (optional)" value={customerDetails.landmark} onChange={handleInputChange} />
-
-                        <h3>Delivery Preferences</h3>
-                        <input type="date" name="preferredDate" value={customerDetails.preferredDate} onChange={handleInputChange} />
-                        <input type="text" name="timeSlot" placeholder="Preferred Time Slot" value={customerDetails.timeSlot} onChange={handleInputChange} />
-                        <textarea name="instructions" placeholder="Delivery Instructions" value={customerDetails.instructions} onChange={handleInputChange} />
-
-                        <h3>Payment Information</h3>
-                        <select name="paymentMethod" value={customerDetails.paymentMethod} onChange={handleInputChange}>
-                            <option value="COD">Cash on Delivery</option>
-                            <option value="CreditCard">Credit Card</option>
-                            <option value="PayPal">PayPal</option>
-                        </select>
-                        <input type="text" name="billingAddress" placeholder="Billing Address (if different)" value={customerDetails.billingAddress} onChange={handleInputChange} />
-                        <button className="checkout" onClick={handleOrderConfirmation}>Confirm Order</button>
-                    </div>
-                </div>
+                    <button onClick={handleCheckout} className="btn-primary">
+                        Proceed to Checkout
+                    </button>
+                </>
             )}
         </div>
     );

@@ -1,9 +1,9 @@
-import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useState, useContext } from 'react';  // Added useContext import
 import AuthContext from '../context/AuthContext';
 
 const LoginPage = () => {
-    const { loginUser } = useContext(AuthContext);
+    const { loginUser } = useContext(AuthContext);  // Accessing loginUser from context
     const navigate = useNavigate();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -22,11 +22,15 @@ const LoginPage = () => {
             return;
         }
 
-        const result = await loginUser(e); // Call loginUser
-        if (result?.error) {
-            setError(result.error); // Show error message
+        try {
+            // Call loginUser with username and password
+            await loginUser({ username, password });
+
+            setLoading(false);
+        } catch (err) {
+            setError('Login failed. Please check your credentials.');
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     return (
@@ -42,7 +46,6 @@ const LoginPage = () => {
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         style={styles.input}
-                        autoComplete="username"
                     />
                 </div>
                 <div style={styles.inputGroup}>
@@ -53,7 +56,6 @@ const LoginPage = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         style={styles.input}
-                        autoComplete="current-password"
                     />
                 </div>
                 <button type="submit" style={styles.button} disabled={loading}>
@@ -66,9 +68,6 @@ const LoginPage = () => {
         </div>
     );
 };
-
-// Styles remain unchanged
-
 
 const styles = {
     container: {
@@ -104,13 +103,13 @@ const styles = {
         backgroundColor: '#007BFF',
         color: '#fff',
         cursor: 'pointer',
-        marginBottom: '10px', // Add some margin for separation
+        marginBottom: '10px',
     },
     registerButton: {
         padding: '10px',
         borderRadius: '4px',
         border: 'none',
-        backgroundColor: '#28a745', // Different color for register button
+        backgroundColor: '#28a745',
         color: '#fff',
         cursor: 'pointer',
     },

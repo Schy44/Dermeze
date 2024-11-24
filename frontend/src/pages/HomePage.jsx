@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Link } from 'react-router-dom';
-import AuthContext from '../context/AuthContext';
+import { Link, useNavigate } from 'react-router-dom';
+import AuthContext from '../context/AuthContext'; // This should now work since AuthContext is exported as default
 import modelImage from "../assets/Images/model.png";
 import '../assets/HomePage.css';
 
@@ -10,11 +10,19 @@ const HomePage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [products, setProducts] = useState([]); // New state for products
+    const navigate = useNavigate();
 
     useEffect(() => {
+        // If no authTokens, redirect to login
+        if (!authTokens) {
+            navigate('/login'); // Redirect to login page
+            return;
+        }
+        console.log(authTokens?.access);
+        // Fetch profile and products if authenticated
         getProfile();
-        getProducts(); // Fetch products from the database
-    }, [authTokens]);
+        getProducts();
+    }, [authTokens, navigate]);
 
     // Fetch Profile Data
     const getProfile = async () => {
@@ -31,7 +39,8 @@ const HomePage = () => {
             }
 
             const data = await response.json();
-            setProfile(data);
+            setProfile(data);  // Here, `data` should contain the profile information along with `user` details
+
         } catch (error) {
             console.error('Error fetching profile:', error);
             setError(error.message);
@@ -43,6 +52,11 @@ const HomePage = () => {
 
     // Fetch Products from the Database
     const getProducts = async () => {
+        if (!authTokens) {
+            setError('You are not authenticated');
+            return;
+        }
+
         try {
             const response = await fetch('http://127.0.0.1:8000/api/products/', {
                 method: 'GET',
@@ -59,6 +73,7 @@ const HomePage = () => {
             setProducts(data);
         } catch (error) {
             console.error('Error fetching products:', error);
+            setError('Error fetching products');
         }
     };
 
@@ -82,7 +97,8 @@ const HomePage = () => {
 
             {/* Profile Section */}
             <div className="profile-section">
-                <h1>Welcome, {profile?.username || 'User'}!</h1>
+                {/* Displaying username if available */}
+                <h1>Welcome, {profile?.user?.username || 'User'}!</h1>
                 <img src={modelImage} alt="User Model" className="profile-image" />
                 <p>Personalized skincare recommendations based on your profile.</p>
             </div>

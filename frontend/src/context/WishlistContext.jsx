@@ -12,13 +12,17 @@ export const useWishlist = () => {
 export const WishlistProvider = ({ children }) => {
     const [wishlist, setWishlist] = useState([]);
 
+    // Function to check if an item is in the wishlist
+    const isWishlisted = (id) => {
+        return wishlist.some(item => item.id === id);
+    };
+
     // Add item to wishlist
     const addToWishlist = (item) => {
-        // Check if item already exists in wishlist
-        if (!wishlist.some(existingItem => existingItem.id === item.id)) {
+        if (!isWishlisted(item.id)) {
             setWishlist([...wishlist, item]);
         } else {
-            alert("This item is already in your wishlist!"); // Or you can display a custom popup
+            alert("This item is already in your wishlist!");
         }
     };
 
@@ -28,7 +32,7 @@ export const WishlistProvider = ({ children }) => {
     };
 
     return (
-        <WishlistContext.Provider value={{ wishlist, addToWishlist, removeFromWishlist }}>
+        <WishlistContext.Provider value={{ wishlist, addToWishlist, removeFromWishlist, isWishlisted }}>
             {children}
         </WishlistContext.Provider>
     );

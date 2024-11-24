@@ -11,6 +11,8 @@ import PrivateRoute from './utils/PrivateRoute';
 import ProductList from './pages/ProductList';
 import Product from './pages/Product';
 import Cart from './pages/Cart';
+import CheckoutPage from './pages/CheckoutPage';
+import OrderConfirmationPage from './pages/OrderConfirmationPage';
 import WishlistPage from './pages/WishlistPage';
 
 function App() {
@@ -29,7 +31,10 @@ function App() {
                 <Route path="/productList" element={<PrivateRoute><ProductList /></PrivateRoute>} />
                 <Route path="/product/:id" element={<PrivateRoute><Product /></PrivateRoute>} />
                 <Route path="/cart" element={<PrivateRoute><Cart /></PrivateRoute>} />
+                <Route path="/checkoutPage" element={<PrivateRoute><CheckoutPage /></PrivateRoute>} />
                 <Route path="/wishlist" element={<PrivateRoute><WishlistPage /></PrivateRoute>} /> {/* New wishlist route */}
+                <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
+
               </Routes>
             </WishlistProvider>
           </CartProvider>

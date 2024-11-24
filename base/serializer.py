@@ -1,62 +1,59 @@
 from rest_framework import serializers
-from base.models import *
-from base.models import Product, Category, SkinConcern, SkinType,User
-
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = '__all__'
-
-class ProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer(many=False, read_only=True)
-    class Meta:
-        model = Profile
-        fields = ('user', 'first_name', 'last_name', 'email')
-
+from base.models import Product, Category, SkinConcern, Profile, Order, OrderItem
+from django.contrib.auth.models import User
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password']
+        fields = ['username', 'password', 'email']
 
     def create(self, validated_data):
-    
-        user = User(
+        # Create a user
+        user = User.objects.create_user(
             username=validated_data['username'],
+            password=validated_data['password'],
             email=validated_data['email']
         )
-        user.set_password(validated_data['password'])
-        user.save()
-        return user        
-    
+        return user
 
-class SkinConcernSerializer(serializers.ModelSerializer):
+class ProfileSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+    email = serializers.EmailField(source='user.email', read_only=True)
+
     class Meta:
-        model = SkinConcern
-        fields = ['id', 'name', 'description'] 
+        model = Profile
+        fields = ['id', 'username', 'email']
+
+        
+
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = '__all__'
+
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['id', 'name', 'description', 'slug', 'is_active']
+        fields = '__all__'
 
 
-class ProductSerializer(serializers.ModelSerializer):
-    image_url = serializers.SerializerMethodField()
+class SkinConcernSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SkinConcern
+        fields = '__all__'
 
-    def get_image_url(self, obj):
-        request = self.context.get('request')  # Get the request context
-        if request and obj.image:
-            return request.build_absolute_uri(obj.image.url)  # Build the absolute URL
-        return None  # Return None if no image is found or request is not available
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderItem
+        fields = ['id', 'product', 'quantity', 'price']
+
+class OrderSerializer(serializers.ModelSerializer):
+    cart_items = OrderItemSerializer(many=True, read_only=True)  
 
     class Meta:
-        model = Product
-        fields = [
-            'id', 'name', 'description', 'price', 'discount_price', 'image', 'image_url',
-            'rating', 'stock', 'is_available', 'category', 'skin_type', 'skin_concerns',
-            'ingredients', 'usage_instructions', 'brand', 'created_at', 'updated_at'
-        ]
+        model = Order
+        fields = ['id', 'user', 'address', 'city', 'postal_code', 'phone_number', 'total', 'cart_items']
