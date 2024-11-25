@@ -2,11 +2,16 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+import { fetchWithAuth } from '../context/AuthContext';
 import '../assets/checkoutpage.css';
-import { fetchWithAuth } from '../context/AuthContext';  // Import it directly from the context if it's exported
+
+// Load your Stripe public key
+const stripePromise = loadStripe('pk_test_51QP3LDAGfFENmCUes7k1b8WYOeKpDSndEtX8ATF31K1lPBhww4M9LqwEbitz8dfZlL5pC124nFsxpWB1jbMDspHE00kNz7nOux');
 
 const CheckoutPage = () => {
-    const { authTokens } = useContext(AuthContext);  // Ensure authTokens are available
+    const { authTokens } = useContext(AuthContext);
     const { cartItems } = useCart();
     const [address, setAddress] = useState({
         address: '',
@@ -16,10 +21,12 @@ const CheckoutPage = () => {
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const stripe = useStripe();
+    const elements = useElements();
     const navigate = useNavigate();
-    const location = useLocation();  // To get the passed state
+    const location = useLocation();
 
-    const orderItems = location.state?.orderItems || [];  // Get the orderItems from Cart
+    const orderItems = location.state?.orderItems || [];
 
     useEffect(() => {
         if (!authTokens) {
@@ -29,7 +36,6 @@ const CheckoutPage = () => {
             console.log('Auth token:', authTokens);
         }
     }, [authTokens, navigate]);
-
 
     const handleAddressChange = (e) => {
         const { name, value } = e.target;
@@ -55,6 +61,12 @@ const CheckoutPage = () => {
             return;
         }
 
+        if (!stripe || !elements) {
+            setError('Stripe.js has not loaded yet.');
+            setLoading(false);
+            return;
+        }
+
         const orderData = {
             address: address.address,
             city: address.city,
@@ -67,13 +79,27 @@ const CheckoutPage = () => {
         };
 
         try {
+            // Call the backend to create a payment intent
             const data = await fetchWithAuth('http://127.0.0.1:8000/api/orders/checkout/', {
                 method: 'POST',
                 body: JSON.stringify(orderData),
-            }, authTokens); // Pass authTokens here
+            }, authTokens);
 
             if (data?.message === 'Order confirmed') {
-                navigate('/order-confirmation', { state: { orderId: data.order.id } });
+                // Confirm payment using the client secret returned by the backend
+                const { clientSecret } = data;
+
+                const paymentIntent = await stripe.confirmCardPayment(clientSecret, {
+                    payment_method: {
+                        card: elements.getElement(CardElement),
+                    },
+                });
+
+                if (paymentIntent.error) {
+                    setError(paymentIntent.error.message);
+                } else {
+                    navigate('/order-confirmation', { state: { orderId: data.order.id } });
+                }
             } else {
                 setError(data?.message || 'Could not confirm the order. Please try again.');
             }
@@ -83,14 +109,7 @@ const CheckoutPage = () => {
         } finally {
             setLoading(false);
         }
-
-        if (!authTokens) {
-            console.error('Auth token is not available');
-            return;
-        }
-
     };
-
 
     return (
         <div className="checkout-container">
@@ -107,7 +126,6 @@ const CheckoutPage = () => {
                         required
                     />
                 </div>
-
                 <div className="form-group">
                     <label>City:</label>
                     <input
@@ -118,7 +136,6 @@ const CheckoutPage = () => {
                         required
                     />
                 </div>
-
                 <div className="form-group">
                     <label>Postal Code:</label>
                     <input
@@ -129,7 +146,6 @@ const CheckoutPage = () => {
                         required
                     />
                 </div>
-
                 <div className="form-group">
                     <label>Phone Number:</label>
                     <input
@@ -139,6 +155,12 @@ const CheckoutPage = () => {
                         onChange={handleAddressChange}
                         required
                     />
+                </div>
+
+                <h3>Payment Information</h3>
+                <div className="form-group">
+                    <label>Card Details:</label>
+                    <CardElement />
                 </div>
 
                 {error && <p className="error-message">{error}</p>}
@@ -151,4 +173,8 @@ const CheckoutPage = () => {
     );
 };
 
-export default CheckoutPage;
+export default () => (
+    <Elements stripe={stripePromise}>
+        <CheckoutPage />
+    </Elements>
+);

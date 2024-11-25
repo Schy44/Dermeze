@@ -1,6 +1,6 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes,action
 from rest_framework.permissions import IsAuthenticated ,  AllowAny 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -18,6 +18,9 @@ from base.models import Product, Category, SkinConcern, Profile, Order, OrderIte
 from django.contrib.auth.models import User
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
+import stripe
+from django.conf import settings
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 @api_view(['POST'])
@@ -111,12 +114,10 @@ class SkinConcernListView(generics.ListCreateAPIView):
 
 
 
-@permission_classes([AllowAny])
 class OrderViewSet(viewsets.ViewSet):
-
     @action(detail=False, methods=['post'])
     def checkout(self, request):
-        # Get data from the request
+        # Get the data from the request
         address = request.data.get('address')
         city = request.data.get('city')
         postal_code = request.data.get('postal_code')
@@ -128,21 +129,16 @@ class OrderViewSet(viewsets.ViewSet):
             return Response({"message": "Please provide all required details"}, status=status.HTTP_400_BAD_REQUEST)
 
         total = 0
-        # Process each cart item
         for item in cart_items:
             try:
                 product = Product.objects.get(id=item['product_id'])
             except Product.DoesNotExist:
                 return Response({"message": f"Product with ID {item['product_id']} not found"}, status=status.HTTP_404_NOT_FOUND)
 
-            # Check if there is sufficient stock for the product
             if item['quantity'] > product.stock:
                 return Response({"message": f"Insufficient stock for {product.name}"}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Calculate the total price of the order
             total += item['quantity'] * product.price
-
-            # Decrease the stock for the product
             product.stock -= item['quantity']
             product.save()
 
@@ -156,7 +152,7 @@ class OrderViewSet(viewsets.ViewSet):
             phone_number=phone_number
         )
 
-        # Create OrderItems for each product in the cart
+        # Create order items
         for item in cart_items:
             product = Product.objects.get(id=item['product_id'])
             OrderItem.objects.create(
@@ -166,26 +162,68 @@ class OrderViewSet(viewsets.ViewSet):
                 price=product.price
             )
 
-        # Serialize the order data, including order items (cart items)
+        # Serialize the order data, including the order items
         order_serializer = OrderSerializer(order)
-        return Response({"message": "Order confirmed", "order": order_serializer.data}, status=status.HTTP_201_CREATED)
+
+        # Create a payment intent with Stripe
+        try:
+            payment_intent = stripe.PaymentIntent.create(
+                amount=int(order.total * 100),  # Amount in cents
+                currency="usd",  # Ensure this matches your currency
+                metadata={'order_id': order.id}
+            )
+            return Response({
+                "message": "Order confirmed",
+                "order": order_serializer.data,
+                "clientSecret": payment_intent.client_secret  # Send client secret for frontend to confirm payment
+            }, status=status.HTTP_201_CREATED)
+        except stripe.error.StripeError as e:
+            return Response({"message": f"Stripe error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=False, methods=['post'])
+    def make_payment(self, request):
+        order_id = request.data.get('order_id')
+        payment_method_id = request.data.get('payment_method_id')
+
+        try:
+            # Fetch the order
+            order = Order.objects.get(id=order_id, user=request.user)
+
+            # If the order is already paid, return an error
+            if order.status == Order.OrderStatus.PAID:
+                return Response({"message": "Order is already paid"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Confirm the payment with Stripe
+            payment_intent = stripe.PaymentIntent.confirm(
+                request.data.get('clientSecret'),
+                payment_method=payment_method_id
+            )
+
+            # Check the payment status
+            if payment_intent.status == 'succeeded':
+                order.status = Order.OrderStatus.PAID
+                order.save()
+                return Response({
+                    "message": "Payment successful",
+                    "payment_intent_id": payment_intent.id
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({"message": "Payment failed"}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Order.DoesNotExist:
+            return Response({"message": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
+        except stripe.error.StripeError as e:
+            return Response({"message": f"Stripe error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            return Response({"message": f"An error occurred: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def retrieve(self, request, pk=None):
         try:
-            # Retrieve the order by primary key (ID), ensure user is authorized to view it
-            order = Order.objects.get(id=pk, user=request.user)  # Only allow the user to view their own orders
-
-            # Retrieve the related order items (cart items)
-            order_items = order.order_items.all()  # 'order_items' is the related name in OrderItem
-
-            # Serialize the order and its items
+            order = Order.objects.get(id=pk, user=request.user)
+            order_items = order.order_items.all()
             order_serializer = OrderSerializer(order)
             order_data = order_serializer.data
-
-            # Add cart items to the response manually
             order_data['cart_items'] = OrderItemSerializer(order_items, many=True).data
-
             return Response(order_data)
         except Order.DoesNotExist:
             return Response({"message": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
-

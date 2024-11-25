@@ -11,6 +11,8 @@
     "clean": "rm -rf node_modules/.vite"
   },
   "dependencies": {
+    "@stripe/react-stripe-js": "^3.0.0",
+    "@stripe/stripe-js": "^5.2.0",
     "axios": "^1.7.7",
     "jwt-decode": "^3.1.2",
     "lodash": "^4.17.21",

@@ -61,8 +61,8 @@ class SkinConcern(models.Model):
 
     def __str__(self):
         return self.name
-
-# Product model
+    
+    
 class Product(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
@@ -71,7 +71,6 @@ class Product(models.Model):
     image = models.ImageField(upload_to='product_images/', blank=True, null=True)
     rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.0)
     stock = models.IntegerField(default=0)
-    is_available = models.BooleanField(default=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
     skin_type = models.CharField(max_length=20, choices=SkinType.choices, blank=True)
     skin_concerns = models.ManyToManyField(SkinConcern, blank=True)
@@ -81,11 +80,25 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    @property
+    def effective_price(self):
+        return self.discount_price if self.discount_price else self.price
+
+    @property
+    def is_available(self):
+        return self.stock > 0
+
     def __str__(self):
         return self.name
 
-# Order model
 class Order(models.Model):
+    class OrderStatus(models.TextChoices):
+        PENDING = 'pending', 'Pending'
+        PAID = 'paid', 'Paid'
+        SHIPPED = 'shipped', 'Shipped'
+        COMPLETED = 'completed', 'Completed'
+        CANCELLED = 'cancelled', 'Cancelled'
+
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
     address = models.CharField(max_length=255, default="Default Address")
     city = models.CharField(max_length=100)
@@ -93,18 +106,23 @@ class Order(models.Model):
     phone_number = models.CharField(max_length=15)
     created_at = models.DateTimeField(auto_now_add=True)
     total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    is_paid = models.BooleanField(default=False)
-    status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=20, choices=OrderStatus.choices, default=OrderStatus.PENDING)
+
+    @property
+    def is_paid(self):
+        return self.status == self.OrderStatus.PAID
 
     def __str__(self):
         return f"Order {self.id} by {self.user.username}"
-
-# OrderItem model
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    @property
+    def subtotal(self):
+        return self.quantity * self.price
 
     def __str__(self):
         return f"{self.quantity} x {self.product.name} in Order {self.order.id}"
