@@ -73,7 +73,7 @@ def get_profile(request):
     serializer = ProfileSerializer(profile, many=False)
     return Response(serializer.data)
 
-
+@permission_classes([AllowAny]) 
 class ProductListView(APIView):
     def get(self, request, format=None):
         products = Product.objects.all()
@@ -87,7 +87,7 @@ class ProductListView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+@permission_classes([AllowAny]) 
 class ProductDetailView(APIView):
     def get(self, request, id, format=None):
         product = get_object_or_404(Product, id=id)
@@ -102,12 +102,12 @@ class ProductDetailView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+@permission_classes([AllowAny]) 
 class CategoryListView(generics.ListCreateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
-
+@permission_classes([AllowAny]) 
 class SkinConcernListView(generics.ListCreateAPIView):
     queryset = SkinConcern.objects.all()
     serializer_class = SkinConcernSerializer
