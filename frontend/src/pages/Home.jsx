@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
-import modelImage from "../assets/Images/model.png";
 import '../assets/HomePage.css';
 import Herosec from '../components/Herosec';
 import Collection from '../components/Collection';

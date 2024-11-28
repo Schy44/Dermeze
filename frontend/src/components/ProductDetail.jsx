@@ -64,39 +64,39 @@ const ProductDetail = () => {
   }
 
   return (
-    <>
-      {/* Removed the <Header /> to omit the navbar */}
-      <div className="product-detail-container">
-        <div className="product-detail">
-          <img src={imageUrl || '/media/default-placeholder.jpg'} alt={product.name} />
-          <div className="product-info">
-            <h1>{product.name}</h1>
-            <p><strong>Description:</strong> {product.description}</p>
-            <p><strong>Price:</strong> ${product.discount_price || product.price}</p>
-            {product.rating && <div className="rating"><RatingStars rating={product.rating} /></div>}
-            <p><strong>Skin Type:</strong> {product.skin_type}</p>
-            <p><strong>Ingredients:</strong> {product.ingredients}</p>
-            <p><strong>Usage Instructions:</strong> {product.usage_instructions}</p>
-            <p><strong>Brand:</strong> {product.brand}</p>
-            <p><strong>Stock Available:</strong> {product.stock} units</p>
+    <> <div className="product-detail-container">
+      <div className="product-detail">
+        {/* Use the fixed image URL */}
+        <img src={product.image || '/media/default-placeholder.jpg'} alt={product.name} />
+        <div className="product-info">
+          <h1>{product.name}</h1>
+          <p><strong>Description:</strong> {product.description}</p>
+          <p><strong>Price:</strong> ${product.discount_price || product.price}</p>
+          {product.rating && <div className="rating"><RatingStars rating={product.rating} /></div>}
 
-            {/* Quantity Section */}
-            <div className="quantity-container">
-              <button onClick={decrement} className="quantity-btn">-</button>
-              <span className="quantity">{quantity}</span>
-              <button onClick={increment} className="quantity-btn">+</button>
-            </div>
+          <p><strong>Skin Type:</strong> {product.skin_type}</p>
+          <p><strong>Ingredients:</strong> {product.ingredients}</p>
+          <p><strong>Usage Instructions:</strong> {product.usage_instructions}</p>
+          <p><strong>Brand:</strong> {product.brand}</p>
+          <p><strong>Stock Available:</strong> {product.stock} units</p>
 
-            {/* Wishlist Button */}
-            <button className="wishlist-button" onClick={handleWishlistToggle}>
-              {isWishlisted(product.id) ? "Remove from Wishlist" : "Add to Wishlist"}
-            </button>
-
-            {/* Add to Cart Button */}
-            <button className="addto-cart" onClick={handleAddToCart}>Add to Cart</button>
+          {/* Quantity Section */}
+          <div className="quantity-container">
+            <button onClick={decrement} className="quantity-btn">-</button>
+            <span className="quantity">{quantity}</span>
+            <button onClick={increment} className="quantity-btn">+</button>
           </div>
+
+          {/* Wishlist Button */}
+          <button className="wishlist-button" onClick={handleWishlistToggle}>
+            {isWishlisted(product.id) ? "Remove from Wishlist" : "Add to Wishlist"}
+          </button>
+
+          {/* Add to Cart Button */}
+          <button className="addto-cart" onClick={handleAddToCart}>Add to Cart</button>
         </div>
       </div>
+    </div>
       <Footer />
     </>
   );

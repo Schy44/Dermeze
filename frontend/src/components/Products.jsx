@@ -4,7 +4,7 @@ import AuthContext from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import '../assets/ProductList.css';
 import Footer from './Footer';
-import { debounce } from 'lodash'; // Use lodash for debouncing
+import { debounce } from 'lodash'; // For debouncing the search input
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -18,10 +18,11 @@ const Products = () => {
   const [skinFilter, setSkinFilter] = useState('');
   const [brandFilter, setBrandFilter] = useState('');
 
-  const { authTokens } = useContext(AuthContext);  // Still using AuthContext to get tokens if needed
-  const { addToCart } = useCart();
+  const { addToCart } = useCart(); // Add to cart functionality from context
 
-  // Function to fetch products based on selected categories and filters
+  const placeholderImage = "https://via.placeholder.com/150"; // Placeholder for missing images
+
+  // Function to fetch products from the API
   const fetchProducts = async (categoryIds = []) => {
     setLoadingProducts(true);
     setError(null);
@@ -29,10 +30,16 @@ const Products = () => {
       const url = categoryIds.length
         ? `http://127.0.0.1:8000/api/products/?categories=${categoryIds.join(',')}&search=${searchTerm}&skin_type=${skinFilter}&brand=${brandFilter}`
         : `http://127.0.0.1:8000/api/products/?search=${searchTerm}&skin_type=${skinFilter}&brand=${brandFilter}`;
-      // Replace fetchWithAuth with simple fetch for products (no auth required)
       const response = await fetch(url);
       const data = await response.json();
-      setProducts(data);
+
+      // Update image URLs for relative paths
+      const updatedProducts = data.map((product) => ({
+        ...product,
+        image_url: product.image.startsWith('http') ? product.image : `http://127.0.0.1:8000${product.image}`,
+      }));
+
+      setProducts(updatedProducts);
     } catch (error) {
       console.error("Error fetching products:", error);
       setError('Error fetching products');
@@ -41,7 +48,7 @@ const Products = () => {
     }
   };
 
-  // Function to fetch categories for the filters
+  // Function to fetch categories for filters
   const fetchCategories = async () => {
     setLoadingCategories(true);
     setError(null);
@@ -57,14 +64,16 @@ const Products = () => {
     }
   };
 
-  // Debounced fetch function for products
+  // Debounced function to fetch products
   const debouncedFetchProducts = debounce(fetchProducts, 500);
 
+  // Fetch initial data on component mount
   useEffect(() => {
     fetchCategories();
-    fetchProducts(); // Initial call to fetch products
+    fetchProducts();
   }, []);
 
+  // Update products whenever filters change
   useEffect(() => {
     if (selectedCategories.length) {
       debouncedFetchProducts(selectedCategories);
@@ -74,13 +83,11 @@ const Products = () => {
   }, [selectedCategories, searchTerm, priceSort, skinFilter, brandFilter]);
 
   const handleCategoryToggle = (categoryId) => {
-    setSelectedCategories(prevState => {
-      if (prevState.includes(categoryId)) {
-        return prevState.filter(id => id !== categoryId);
-      } else {
-        return [...prevState, categoryId];
-      }
-    });
+    setSelectedCategories((prevState) =>
+      prevState.includes(categoryId)
+        ? prevState.filter((id) => id !== categoryId)
+        : [...prevState, categoryId]
+    );
   };
 
   const handleSearch = (event) => {
@@ -91,20 +98,20 @@ const Products = () => {
     setPriceSort(event.target.value);
   };
 
-  const handleSkinFilter = (event) => {
-    setSkinFilter(event.target.value);
+  const handleSkinFilter = (value) => {
+    setSkinFilter(value);
   };
 
   const handleBrandFilter = (event) => {
     setBrandFilter(event.target.value);
   };
 
-  // Function to clear all filters
   const clearFilters = () => {
     setSearchTerm('');
     setPriceSort('lowToHigh');
     setSkinFilter('');
     setBrandFilter('');
+    setSelectedCategories([]);
   };
 
   if (loadingProducts || loadingCategories) {
@@ -144,9 +151,9 @@ const Products = () => {
           </select>
 
           {/* Filter by skin type */}
-          <button onClick={() => setSkinFilter('oily')}>Oily</button>
-          <button onClick={() => setSkinFilter('sensitive')}>Sensitive</button>
-          <button onClick={() => setSkinFilter('combination')}>Combination</button>
+          <button onClick={() => handleSkinFilter('oily')}>Oily</button>
+          <button onClick={() => handleSkinFilter('sensitive')}>Sensitive</button>
+          <button onClick={() => handleSkinFilter('combination')}>Combination</button>
 
           {/* Filter by brand */}
           <select value={brandFilter} onChange={handleBrandFilter}>
@@ -166,7 +173,7 @@ const Products = () => {
             sortedProducts.map((product) => (
               <div key={product.id} className="product-item">
                 <NavLink to={`/product/${product.id}`}>
-                  <img src={product.image_url || "https://via.placeholder.com/150"} alt={product.name} />
+                  <img src={product.image_url || placeholderImage} alt={product.name} />
                   <h2>{product.name}</h2>
                   <p>Price: ${product.discount_price ?? product.price}</p>
                 </NavLink>
