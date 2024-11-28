@@ -50,45 +50,69 @@ const Cart = () => {
 
     return (
         <div className="cart-container">
-            <h2>Your Cart</h2>
+            <h2>Cart</h2>
             {cartItems.length === 0 ? (
                 <p>Your cart is empty.</p>
             ) : (
                 <>
-                    <ul>
+                    <ul className="cart-list">
                         {cartItems.map((item) => (
-                            <li key={item.id}>
-                                {item.name} x {item.quantity} - ${item.price * item.quantity}
-                                <button onClick={() => removeFromCart(item.id)}>Remove</button>
-                                <button onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</button>
-                                <button onClick={() => updateQuantity(item.id, item.quantity - 1)}>-</button>
+                            <li key={item.id} className="cart-item">
+                                <div className="item-image">
+                                    <img src={item.image} alt={item.name} />
+                                </div>
+                                <div className="item-info">
+                                    <h4>{item.name}</h4>
+                                </div>
+                                <div className="item-quantity">
+                                    <div className="quantity-controls">
+                                        <button onClick={() => updateQuantity(item.id, item.quantity - 1)}>-</button>
+                                        <span>{item.quantity}</span>
+                                        <button onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</button>
+                                    </div>
+                                    <button className="remove-btn" onClick={() => removeFromCart(item.id)}>
+                                        Remove
+                                    </button>
+                                </div>
+                                <div className="item-price">
+                                    <span>${(item.price * item.quantity).toFixed(2)}</span>
+                                </div>
                             </li>
                         ))}
                     </ul>
 
-                    <div className="cart-summary">
-                        <h3>Subtotal: ${totalPrice.toFixed(2)}</h3>
-                        <h3>Discount: {discount}%</h3>
-                        <h3>Final Price: ${finalPrice.toFixed(2)}</h3>
-                    </div>
-
-                    <form onSubmit={handleCouponSubmit}>
+                    <form onSubmit={handleCouponSubmit} className="coupon-form">
                         <input
                             type="text"
                             value={couponCode}
                             onChange={(e) => setCouponCode(e.target.value)}
-                            placeholder="Enter coupon code"
+                            placeholder="Discount Code"
                         />
-                        <button type="submit">Apply Coupon</button>
+                        <button type="submit" className="apply-btn">Apply</button>
                     </form>
                     {couponError && <p className="error-message">{couponError}</p>}
 
-                    <button onClick={handleCheckout} className="btn-primary">
-                        Proceed to Checkout
+                    <div className="cart-summary">
+                        <div className="summary-row">
+                            <span>Subtotal</span>
+                            <span>${totalPrice.toFixed(2)}</span>
+                        </div>
+                        <div className="summary-row">
+                            <span>Shipping & taxes calculated at checkout</span>
+                        </div>
+                        <div className="summary-row total">
+                            <span>Total:</span>
+                            <span>${finalPrice.toFixed(2)}</span>
+                        </div>
+                    </div>
+
+                    <button onClick={handleCheckout} className="btn-primary checkout-btn">
+                        <span className="lock-icon">🔒</span> Checkout
                     </button>
                 </>
             )}
         </div>
+
     );
 };
 

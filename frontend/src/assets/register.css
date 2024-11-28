@@ -45,7 +45,7 @@
 }
 
 .register-container .input:focus {
-    border-color: #ff6347;
+    border-color: rgb(140, 208, 227);
     outline: none;
 }
 
@@ -58,7 +58,7 @@
 .register-container .button {
     padding: 12px 20px;
     font-size: 16px;
-    background-color: #ff6347;
+    background-color: rgb(140, 208, 227);
     color: white;
     border: none;
     border-radius: 5px;
@@ -68,5 +68,5 @@
 }
 
 .register-container .button:hover {
-    background-color: #d6482f;
+    background-color: rgb(7, 73, 91);
 }

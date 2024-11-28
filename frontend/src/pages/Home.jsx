@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
-import '../assets/HomePage.css';
+import '../assets/Home.css';
 import Herosec from '../components/Herosec';
 import Collection from '../components/Collection';
 import BannerSection from '../components/BannerSection';

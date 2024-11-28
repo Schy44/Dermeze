@@ -27,7 +27,12 @@ SECRET_KEY = 'django-insecure-ss6w8n@mbnh=s@i1fafpf2*+bz931w*12740x%uct55)8efk)s
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '127.0.0.1',  # for localhost
+    'localhost',  # for localhost
+    '4249-103-146-3-213.ngrok-free.app',  # Add your ngrok URL here
+    'localhost:8000',  # Allow localhost on port 8000
+]
 
 
 # Application definition
@@ -99,9 +104,9 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',  
         'rest_framework.authentication.BasicAuthentication',         
     ),
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',  
-    ],
+   # 'DEFAULT_PERMISSION_CLASSES': [
+    #    'rest_framework.permissions.IsAuthenticated',  
+    #],
 }
 
 
@@ -198,3 +203,5 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # settings.py
 STRIPE_SECRET_KEY = 'sk_test_51QP3LDAGfFENmCUe9nYsOQKGfD5Ky2HvKtaCA3rKgcdz0TJZNkVWP9uS9XOriTbarxKwN9XPpbmeY2yWGeZcK8ds00vvn4AZph'
 STRIPE_PUBLISHABLE_KEY = 'pk_test_51QP3LDAGfFENmCUes7k1b8WYOeKpDSndEtX8ATF31K1lPBhww4M9LqwEbitz8dfZlL5pC124nFsxpWB1jbMDspHE00kNz7nOux'
+
+STRIPE_WEBHOOK_SECRET = 'whsec_C8JnR24pBIwBnG2cvOaC3GRIZr0uGvxa'
