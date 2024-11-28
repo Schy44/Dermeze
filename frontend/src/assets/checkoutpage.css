@@ -9,7 +9,7 @@
 
 .checkout-heading {
     text-align: center;
-    color: #333;
+    color: #000000;
     margin-bottom: 20px;
 }
 
@@ -27,13 +27,13 @@
 
 label {
     font-weight: bold;
-    color: #555;
+    color: #000000;
 }
 
 input,
 select {
     padding: 10px;
-    border: 1px solid #ccc;
+    border: 1px solid rgb(140, 208, 227);
     border-radius: 5px;
     font-size: 16px;
     width: 100%;
@@ -42,13 +42,13 @@ select {
 input:focus,
 select:focus {
     outline: none;
-    border-color: #5c6bc0;
+    border-color: rgb(140, 208, 227);
 }
 
 button.submit-button {
     padding: 15px 20px;
-    background-color: #5c6bc0;
-    color: white;
+    background-color: rgb(140, 208, 227);
+    color: rgb(4, 3, 3);
     font-size: 18px;
     border: none;
     border-radius: 5px;
@@ -62,7 +62,7 @@ button.submit-button:disabled {
 }
 
 button.submit-button:not(:disabled):hover {
-    background-color: #3f4e92;
+    background-color: rgb(140, 208, 227);
 }
 
 .error-message {

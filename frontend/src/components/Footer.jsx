@@ -76,14 +76,14 @@ const Footer = () => {
             </li>
           </ul>
 
-         
+
 
         </div>
 
         <div className="footer-bottom">
 
           <div className="wrapper">
-          <p className='reserved'>© Dermeze  {new Date().getFullYear()} | All rights reserved</p> 
+            <p className='reserved'>© Dermeze  {new Date().getFullYear()} | All rights reserved</p>
 
             <ul className="social-list">
               <li>

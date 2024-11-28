@@ -20,13 +20,13 @@
 .logo a {
     font-size: 24px;
     font-weight: bold;
-    color: #ff6347;
+    color: rgb(140, 208, 227);
     /* Coral color for branding */
     text-decoration: none;
 }
 
 .logo a:hover {
-    color: #ff4500;
+    color: rgb(49, 92, 104);
 }
 
 /* Navigation Links */
@@ -44,13 +44,13 @@
 }
 
 .nav-links a:hover {
-    color: #ff6347;
+    color: rgb(140, 208, 227);
 }
 
 /* Cart and Auth Link Styling */
 .cart-count {
     font-weight: bold;
-    color: #ff6347;
+    color: rgb(140, 208, 227);
 }
 
 .auth-link {
@@ -60,7 +60,7 @@
 }
 
 .auth-link:hover {
-    color: #ff6347;
+    color: rgb(140, 208, 227);
 }
 
 /* Welcome Message */

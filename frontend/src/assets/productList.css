@@ -1,219 +1,155 @@
-/* Global Styles */
-body {
-    background-color: #f9fafc;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    color: #333;
-    margin: 0;
-    padding: 0;
+/* Main Container */
+.product-list-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
 }
 
-/* Container and Layout */
-.product-list-page {
+/* Filters */
+.filters {
     display: flex;
-    flex-wrap: wrap;
-    padding: 20px;
-    gap: 30px;
-}
-
-/* Sidebar Styling */
-.sidebar {
-    flex: 1;
-    max-width: 250px;
-    padding: 25px;
-    background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.sidebar h3 {
-    font-size: 18px;
-    color: #4A90E2;
-    margin-bottom: 20px;
-}
-
-.filter-section {
-    margin-bottom: 25px;
-}
-
-.filter-option label {
-    font-size: 14px;
-    color: #666;
-}
-
-/* Product Grid Styling */
-.product-list {
-    flex: 3;
-    width: 100%;
-    background-color: #ffffff;
-    border-radius: 12px;
-    padding: 25px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.product-list h2 {
-    font-size: 24px;
-    color: #4A90E2;
-    margin-bottom: 20px;
-    border-bottom: 2px solid #e6eaf0;
-    padding-bottom: 10px;
-}
-
-.product-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 25px;
-}
-
-/* Product Card Styling */
-.product-card {
-    background-color: #ffffff;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s, box-shadow 0.3s;
-    position: relative;
-    display: flex;
-    flex-direction: column;
+    align-items: center;
     justify-content: space-between;
+    margin-bottom: 30px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.product-card:hover {
-    transform: scale(1.03);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+.filters input,
+.filters select,
+.filters button {
+    padding: 10px 15px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    outline: none;
+    width: auto;
 }
 
-.product-image {
+.filters input {
+    width: 30%;
+    max-width: 300px;
+}
+
+.filters select,
+.filters button {
+    cursor: pointer;
+}
+
+.filters button {
+    background-color: rgb(140, 208, 227);
+    margin-top: -5px;
+    color: white;
+    transition: background-color 0.3s ease;
+}
+
+.filters button:hover {
+    background-color: rgb(8, 83, 104);
+}
+
+/* Product List Grid */
+.product-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 30px;
+    margin-top: 20px;
+}
+
+/* Product Card */
+.product-item {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.product-item img {
     width: 100%;
-    height: 220px;
+    height: 300px;
     object-fit: cover;
-    border-bottom: 1px solid #e6eaf0;
+    transition: opacity 0.3s ease;
 }
 
-.product-info {
-    padding: 15px;
+.product-item img:hover {
+    opacity: 0.8;
+}
+
+/* Product Info */
+.product-item .info {
+    padding: 20px;
     text-align: center;
 }
 
-.product-info h3 {
-    font-size: 18px;
-    color: #333;
-    margin: 15px 0 8px;
-    font-weight: 600;
-}
-
-.product-badge {
-    position: absolute;
-    background-color: #FF6F61;
-    color: #fff;
-    padding: 5px 12px;
+.product-item h2 {
     font-size: 12px;
-    border-radius: 0 12px 12px 0;
-    top: 12px;
-    left: 0;
+    color: #333;
     font-weight: 600;
+    margin-bottom: 10px;
 }
 
-.price {
-    font-size: 18px;
-    font-weight: bold;
-    color: #4A90E2;
-}
-
-.old-price {
-    font-size: 14px;
-    color: #999;
-    text-decoration: line-through;
-    margin-left: 5px;
-}
-
-.rating {
+.product-item .info p {
     font-size: 14px;
     color: #777;
+    margin: 10px 0;
 }
 
-/* Add to Cart Button */
-.add-to-cart-button {
-    padding: 12px;
-    font-size: 15px;
-    background-color: #FF6F61;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
-    width: 90%;
-    margin: 0 auto;
-    font-weight: 600;
+.product-item .info .price {
+    font-size: 18px;
+    color: #007bff;
+    font-weight: 700;
+    margin: 10px 0;
+
 }
 
-.add-to-cart-button:hover {
-    background-color: #ff5749;
-    transform: scale(1.05);
-}
-
-/* Newsletter */
-.newsletter {
-    width: 100%;
-    text-align: center;
-    margin-top: 30px;
-    padding: 25px;
-    background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.newsletter h2 {
-    font-size: 20px;
-    color: #333;
+.product-item .info .stock {
+    font-size: 14px;
+    color: #28a745;
     margin-bottom: 15px;
 }
 
-.newsletter input[type="email"] {
-    padding: 12px;
-    font-size: 14px;
-    border-radius: 6px;
-    border: 1px solid #ddd;
-    width: 260px;
-    margin-right: 10px;
-}
-
-.newsletter button {
-    padding: 12px 24px;
-    font-size: 15px;
-    background-color: #FF6F61;
-    color: #fff;
+.product-list button {
+    background-color: rgb(140, 208, 227);
+    color: white;
+    padding: 10px 20px;
     border: none;
-    border-radius: 6px;
+    border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s;
+    font-size: 16px;
+    margin-left: 80px;
+    margin-bottom: 20px;
+    transition: background-color 0.3s ease;
 }
 
-.newsletter button:hover {
-    background-color: #ff5749;
+.product-list button:hover {
+    background-color: rgb(6, 85, 107);
 }
 
-/* Responsive Design */
+.product-item a {
+    text-decoration: none;
+    color: black;
+}
+
+/* Responsive Styles */
 @media (max-width: 768px) {
-    .product-list-page {
+    .filters {
         flex-direction: column;
-        gap: 20px;
+        align-items: flex-start;
     }
 
-    .sidebar {
-        max-width: 100%;
-        margin-bottom: 20px;
-    }
-
-    .product-grid {
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    }
-
-    .newsletter input[type="email"] {
+    .filters input,
+    .filters select,
+    .filters button {
         width: 100%;
         margin-bottom: 10px;
-    }
-
-    .newsletter button {
-        width: 100%;
     }
 }

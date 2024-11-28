@@ -29,7 +29,7 @@
 }
 
 .login-container .inputGroup label {
-    font-size: 14px;
+    font-size: 20px;
     color: #555;
     margin-bottom: 5px;
     display: block;
@@ -45,7 +45,7 @@
 }
 
 .login-container .input:focus {
-    border-color: #ff6347;
+    border-color: rgb(140, 208, 227);
     outline: none;
 }
 
@@ -58,7 +58,7 @@
 .login-container .button {
     padding: 12px 20px;
     font-size: 16px;
-    background-color: #ff6347;
+    background-color: rgb(140, 208, 227);
     color: white;
     border: none;
     border-radius: 5px;
@@ -68,13 +68,13 @@
 }
 
 .login-container .button:hover {
-    background-color: #d84d34;
+    background-color: rgb(9, 84, 102);
 }
 
 .login-container .registerButton {
     padding: 10px 20px;
     font-size: 14px;
-    background-color: #db4d34;
+    background-color: rgb(140, 208, 227);
     color: white;
     border: none;
     border-radius: 5px;
@@ -85,5 +85,5 @@
 }
 
 .registerButton:hover {
-    background-color: #ff6347;
+    background-color: rgb(9, 84, 102);
 }

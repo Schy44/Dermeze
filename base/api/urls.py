@@ -22,7 +22,7 @@ urlpatterns = [
     path('products/<int:id>/', ProductDetailView.as_view(), name='product-detail'),
     path('categories/', CategoryListView.as_view(), name='category-list'),
     path('skin-concerns/', SkinConcernListView.as_view(), name='skin-concern-list'),
-   
+    path('orders/webhook/', OrderViewSet.as_view({'post': 'webhook'}), name='stripe-webhook'),
     
    
     path('', include(router.urls)),

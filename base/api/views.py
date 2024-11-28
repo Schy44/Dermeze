@@ -20,7 +20,13 @@ from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 import stripe
 from django.conf import settings
+from django.http import JsonResponse
 stripe.api_key = settings.STRIPE_SECRET_KEY
+import logging
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+logger = logging.getLogger(__name__)
+from django.views.decorators.http import require_http_methods
 
 
 @api_view(['POST'])
@@ -112,7 +118,18 @@ class SkinConcernListView(generics.ListCreateAPIView):
     queryset = SkinConcern.objects.all()
     serializer_class = SkinConcernSerializer
 
-
+@require_http_methods(["GET", "POST"])
+def get_payment_status(request, order_id):
+    try:
+        order = Order.objects.get(id=order_id)
+        if request.method == "GET":
+            payment_status = order.payment_status
+            return JsonResponse({'status': payment_status})
+        elif request.method == "POST":
+            # Handle POST logic here (if needed)
+            return JsonResponse({'status': 'Payment status updated'}, status=200)
+    except Order.DoesNotExist:
+        return JsonResponse({'error': 'Order not found'}, status=404)
 
 class OrderViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['post'])
@@ -184,7 +201,7 @@ class OrderViewSet(viewsets.ViewSet):
     def make_payment(self, request):
         order_id = request.data.get('order_id')
         payment_method_id = request.data.get('payment_method_id')
-
+        client_secret = request.data.get('clientSecret') 
         try:
             # Fetch the order
             order = Order.objects.get(id=order_id, user=request.user)
@@ -227,3 +244,75 @@ class OrderViewSet(viewsets.ViewSet):
             return Response(order_data)
         except Order.DoesNotExist:
             return Response({"message": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
+  
+    @action(detail=False, methods=['post'])
+    @method_decorator(csrf_exempt)
+    @permission_classes([AllowAny])
+    def webhook(self, request):
+        payload = request.body
+        sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+        endpoint_secret = settings.STRIPE_WEBHOOK_SECRET 
+
+        try:
+         
+            event = stripe.Webhook.construct_event(
+                payload, sig_header, endpoint_secret
+            )
+        except ValueError as e:
+            logger.error(f"Invalid payload: {str(e)}")
+            return JsonResponse({'message': 'Invalid payload'}, status=status.HTTP_400_BAD_REQUEST)
+        except stripe.error.SignatureVerificationError as e:
+            logger.error(f"Invalid signature: {str(e)}")
+            return JsonResponse({'message': 'Invalid signature'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Handle the event
+        if event['type'] == 'payment_intent.succeeded':
+            payment_intent = event['data']['object']
+            order_id = payment_intent['metadata']['order_id']
+
+            try:
+                order = Order.objects.get(id=order_id)
+                if order.status != Order.OrderStatus.PAID:
+                    order.status = Order.OrderStatus.PAID
+                    order.save()
+                    logger.info(f"Payment succeeded for order {order_id}. Status updated to PAID.")
+                    return JsonResponse({'message': 'Payment successful'}, status=status.HTTP_200_OK)
+                else:
+                   logger.info(f"Order {order_id} already marked as PAID.")
+                   return JsonResponse({'message': 'Payment already processed'}, status=status.HTTP_200_OK)
+
+
+            except Order.DoesNotExist:
+                logger.error(f"Order not found for payment intent {payment_intent['id']}")
+                return JsonResponse({'message': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        elif event['type'] == 'payment_intent.payment_failed':
+            payment_intent = event['data']['object']
+            order_id = payment_intent['metadata']['order_id']
+
+            try:
+                # Fetch the order and mark as payment failed
+                order = Order.objects.get(id=order_id)
+                order.status = Order.OrderStatus.FAILED
+                order.save()
+                logger.info(f"Payment failed for order {order_id}. Status updated to FAILED.")
+                return JsonResponse({'message': 'Payment failed'}, status=status.HTTP_200_OK)
+
+            except Order.DoesNotExist:
+                return JsonResponse({'message': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    
+        elif event['type'] == 'payment_intent.canceled':
+          payment_intent = event['data']['object']
+          order_id = payment_intent['metadata']['order_id']
+          try:
+            order = Order.objects.get(id=order_id)
+            order.status = Order.OrderStatus.CANCELED
+            order.save()
+            return JsonResponse({'message': 'Payment canceled'}, status=status.HTTP_200_OK)
+          except Order.DoesNotExist:
+            logger.error(f"Order not found for canceled payment intent {payment_intent['id']}")
+            return JsonResponse({'message': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        return JsonResponse({'message': 'Event processed'}, status=status.HTTP_200_OK) 
+    
