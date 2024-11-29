@@ -30,22 +30,14 @@ from django.views.decorators.http import require_http_methods
 
 
 @api_view(['POST'])
-@permission_classes([AllowAny])  # Allows public access
 def register_user(request):
     serializer = RegisterSerializer(data=request.data)
     if serializer.is_valid():
-        # Create the user
         user = serializer.save()
-
-        # Check if profile already exists for this user
         profile, created = Profile.objects.get_or_create(user=user)
-
-        # If the profile is newly created, set the email from the user model
         if created:
-            profile.email = user.email  # Set the email from the user model
+            profile.email = user.email  
             profile.save()
-
-        # Return user and profile data
         return Response({
             "message": "User registered successfully",
             "user": {
@@ -54,8 +46,8 @@ def register_user(request):
             },
             "profile": {
                 "id": profile.id,
-                "username": user.username,  # Fetch username from user
-                "email": user.email  # Fetch email from user
+                "username": user.username, 
+                "email": user.email 
             }
         }, status=status.HTTP_201_CREATED)
     
@@ -79,7 +71,7 @@ def get_profile(request):
     serializer = ProfileSerializer(profile, many=False)
     return Response(serializer.data)
 
-@permission_classes([AllowAny]) 
+
 class ProductListView(APIView):
     def get(self, request, format=None):
         products = Product.objects.all()
@@ -93,7 +85,7 @@ class ProductListView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@permission_classes([AllowAny]) 
+
 class ProductDetailView(APIView):
     def get(self, request, id, format=None):
         product = get_object_or_404(Product, id=id)
@@ -108,15 +100,23 @@ class ProductDetailView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@permission_classes([AllowAny]) 
-class CategoryListView(generics.ListCreateAPIView):
+class CategoryListView(generics.ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
-@permission_classes([AllowAny]) 
+    def get(self, request, *args, **kwargs):
+        slug = self.kwargs.get("slug")
+        if slug:
+            category = get_object_or_404(Category, slug=slug)
+            products = Product.objects.filter(category=category)
+            product_serializer = ProductSerializer(products, many=True)
+            return Response({"products": product_serializer.data})
+        return super().get(request, *args, **kwargs)
+
 class SkinConcernListView(generics.ListCreateAPIView):
     queryset = SkinConcern.objects.all()
     serializer_class = SkinConcernSerializer
+
 
 @require_http_methods(["GET", "POST"])
 def get_payment_status(request, order_id):

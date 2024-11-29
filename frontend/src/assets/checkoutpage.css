@@ -19,10 +19,16 @@
     gap: 20px;
 }
 
-.form-group {
+.address-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.address-item {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    margin-bottom: 15px;
 }
 
 label {
@@ -30,8 +36,7 @@ label {
     color: #000000;
 }
 
-input,
-select {
+input {
     padding: 10px;
     border: 1px solid rgb(140, 208, 227);
     border-radius: 5px;
@@ -39,8 +44,7 @@ select {
     width: 100%;
 }
 
-input:focus,
-select:focus {
+input:focus {
     outline: none;
     border-color: rgb(140, 208, 227);
 }
@@ -54,6 +58,8 @@ button.submit-button {
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    width: 100%;
+    /* Ensure button stretches across the form */
 }
 
 button.submit-button:disabled {
@@ -62,11 +68,26 @@ button.submit-button:disabled {
 }
 
 button.submit-button:not(:disabled):hover {
-    background-color: rgb(140, 208, 227);
+    background-color: rgb(120, 180, 200);
 }
 
 .error-message {
     color: #e74c3c;
     font-size: 14px;
     text-align: center;
+    margin-top: 10px;
+}
+
+@media (max-width: 600px) {
+    .checkout-form {
+        gap: 20px;
+    }
+
+    .form-group {
+        width: 100%;
+    }
+
+    button.submit-button {
+        font-size: 16px;
+    }
 }

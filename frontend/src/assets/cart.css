@@ -1,4 +1,5 @@
 /* Cart Container */
+
 .cart-container {
     max-width: 1200px;
     margin: 20px;
@@ -165,12 +166,24 @@ p {
 }
 
 .item-image img {
-    max-width: 80px;
-    max-height: 80px;
-    border-radius: 8px;
+    max-width: 130px;
+    max-height: 100px;
     object-fit: cover;
-    margin-right: 20px;
+    /* Makes the image fill the container without stretching */
+    display: block;
+    /* Removes the space below the image */
+    border-radius: 5px;
+    /* Optional: to match the design aesthetics */
 }
+
+.item-image {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    /* Ensure no padding around the image */
+}
+
 
 .cart-item {
     display: flex;
@@ -183,13 +196,6 @@ p {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.item-image img {
-    max-width: 80px;
-    max-height: 80px;
-    border-radius: 8px;
-    object-fit: cover;
-    margin-right: 20px;
-}
 
 
 .cart-item .item-info {
@@ -278,13 +284,13 @@ p {
 .cart-item .remove-btn {
     margin-top: 10px;
     padding: 5px 10px;
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: white;
     background-color: #000000;
     /* Make it black */
     border: none;
     cursor: pointer;
-    text-decoration: underline;
+    text-decoration: wavy;
     transition: background-color 0.3s ease;
 }
 
@@ -333,7 +339,10 @@ p {
     font-size: 1.2rem;
     font-weight: bold;
     color: #333;
+    margin-right: 10px;
+    /* Adds space between the price and the right border */
 }
+
 
 /* General Container */
 .cart-container {

@@ -21,8 +21,8 @@ const Header = () => {
                     <Link to="/cart">
                         Cart <span className="cart-count">({itemCount})</span>
                     </Link>
-                    {/* Add Wishlist link */}
                     <Link to="/wishlist">Wishlist</Link>
+                    <Link to="/RoutineMaker">RoutineMaker</Link> {/* Added link here */}
                     {user ? (
                         <span onClick={logoutUser} className="auth-link">Logout</span>
                     ) : (

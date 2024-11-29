@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 import '../assets/Home.css';
 import Herosec from '../components/Herosec';
@@ -11,19 +10,18 @@ import Footer from '../components/Footer';
 function HomePage() {
   const { authTokens, logoutUser } = useContext(AuthContext);
   const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [products, setProducts] = useState([]);
-  const navigate = useNavigate();
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!authTokens) {
-      navigate('/login');
-      return;
-    }
-    getProfile();
+    // Fetch public products
     getProducts();
-  }, [authTokens, navigate]);
+
+    // Fetch profile only if the user is authenticated
+    if (authTokens) {
+      getProfile();
+    }
+  }, [authTokens]);
 
   const getProfile = async () => {
     try {
@@ -39,8 +37,6 @@ function HomePage() {
     } catch (error) {
       setError(error.message);
       logoutUser();
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -48,9 +44,6 @@ function HomePage() {
     try {
       const response = await fetch('http://127.0.0.1:8000/api/products/', {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${authTokens?.access}`,
-        },
       });
       if (!response.ok) throw new Error('Failed to fetch products');
       const data = await response.json();
@@ -60,16 +53,18 @@ function HomePage() {
     }
   };
 
-  if (loading) return <p>Loading profile...</p>;
-  if (error) return <p>Error: {error}</p>;
-
   return (
     <div>
-
       <Herosec />
-      <Collection />
+      <Collection products={products} />
       <BannerSection />
       <FeatureSection />
+      {authTokens && profile && (
+        <div>
+          <p>Welcome back, {profile.name}!</p>
+          <button onClick={logoutUser}>Logout</button>
+        </div>
+      )}
       <Footer />
     </div>
   );

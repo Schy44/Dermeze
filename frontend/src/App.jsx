@@ -15,6 +15,7 @@ import OrderConfirmationPage from './pages/OrderConfirmationPage';
 import WishlistPage from './pages/WishlistPage';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
+import RoutineMaker from './pages/RoutineMaker';
 
 
 const stripePromise = loadStripe('pk_test_51QP3LDAGfFENmCUes7k1b8WYOeKpDSndEtX8ATF31K1lPBhww4M9LqwEbitz8dfZlL5pC124nFsxpWB1jbMDspHE00kNz7nOux');
@@ -34,6 +35,7 @@ function App() {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/productlist" element={<Products />} />
                 <Route path="/product/:id" element={<ProductDetail />} />
+                <Route path="/routineMaker" element={<RoutineMaker />} />
                 {/* <Route path="/productList" element={<PrivateRoute><ProductList /></PrivateRoute>} />
                 <Route path="/product/:id" element={<PrivateRoute><Product /></PrivateRoute>} /> */}
                 <Route path="/cart" element={<PrivateRoute><Cart /></PrivateRoute>} />

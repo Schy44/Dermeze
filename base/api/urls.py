@@ -6,7 +6,7 @@ from rest_framework.routers import DefaultRouter
 from base.api.views import (
     MyTokenObtainPairView, get_profile, register_user,
     ProductListView, ProductDetailView, CategoryListView,
-    SkinConcernListView, OrderViewSet
+    SkinConcernListView, OrderViewSet,
 )
 
 
@@ -21,6 +21,7 @@ urlpatterns = [
     path('products/', ProductListView.as_view(), name='product-list'),
     path('products/<int:id>/', ProductDetailView.as_view(), name='product-detail'),
     path('categories/', CategoryListView.as_view(), name='category-list'),
+    path('categories/<slug:slug>/', CategoryListView.as_view(), name='products-by-category'),
     path('skin-concerns/', SkinConcernListView.as_view(), name='skin-concern-list'),
     path('orders/webhook/', OrderViewSet.as_view({'post': 'webhook'}), name='stripe-webhook'),
     
