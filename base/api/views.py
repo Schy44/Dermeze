@@ -27,6 +27,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 logger = logging.getLogger(__name__)
 from django.views.decorators.http import require_http_methods
+from rest_framework.exceptions import NotFound
 
 
 @api_view(['POST'])
@@ -34,20 +35,11 @@ def register_user(request):
     serializer = RegisterSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.save()
-        profile, created = Profile.objects.get_or_create(user=user)
-        if created:
-            profile.email = user.email  
-            profile.save()
         return Response({
             "message": "User registered successfully",
             "user": {
                 "username": user.username,
                 "email": user.email
-            },
-            "profile": {
-                "id": profile.id,
-                "username": user.username, 
-                "email": user.email 
             }
         }, status=status.HTTP_201_CREATED)
     
@@ -64,12 +56,16 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_profile(request):
-    profile = get_object_or_404(Profile, user=request.user)
-    serializer = ProfileSerializer(profile, many=False)
-    return Response(serializer.data)
+    try:
+        profile = request.user.profile  # Access the profile of the logged-in user
+        serializer = ProfileSerializer(profile)
+        return Response(serializer.data)
+    except Profile.DoesNotExist:
+        raise NotFound(detail="Profile not found.")
 
 
 class ProductListView(APIView):

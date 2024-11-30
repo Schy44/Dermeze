@@ -14,22 +14,20 @@ ORDER_STATUS_CHOICES = [
     ('returned', 'Returned'),
 ]
 
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     email = models.EmailField(blank=True, null=True)
 
     def __str__(self):
         return f"Profile for {self.user.username}"
-    
-# Create user profile automatically
+
+# Create the profile automatically when a user is created, excluding admin users
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
-    if created:
+    if created and not instance.is_staff:  # Exclude admin users from profile creation
         Profile.objects.create(user=instance)
 
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    instance.profile.save()
 
 # Category model
 class Category(models.Model):
