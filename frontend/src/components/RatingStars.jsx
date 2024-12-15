@@ -1,5 +1,5 @@
 import React from 'react';
-import '../assets/productdetail.css'
+import '../assets/Productdetail.css'
 
 // Function to calculate the number of filled stars based on the rating
 const RatingStars = ({ rating }) => {

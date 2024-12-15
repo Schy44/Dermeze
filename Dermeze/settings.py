@@ -13,6 +13,11 @@ import os
 from pathlib import Path
 from datetime import timedelta
 
+import environ
+
+# Initialize the environment variable reader
+env = environ.Env()
+environ.Env.read_env()  # This reads the .env file
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -205,3 +210,5 @@ STRIPE_SECRET_KEY = 'sk_test_51QP3LDAGfFENmCUe9nYsOQKGfD5Ky2HvKtaCA3rKgcdz0TJZNk
 STRIPE_PUBLISHABLE_KEY = 'pk_test_51QP3LDAGfFENmCUes7k1b8WYOeKpDSndEtX8ATF31K1lPBhww4M9LqwEbitz8dfZlL5pC124nFsxpWB1jbMDspHE00kNz7nOux'
 
 STRIPE_WEBHOOK_SECRET = 'whsec_C8JnR24pBIwBnG2cvOaC3GRIZr0uGvxa'
+
+GEMINI_API_KEY= "AIzaSyDKsxjrzO2DogDxn5ZpidMBAa-O24-z_OI"

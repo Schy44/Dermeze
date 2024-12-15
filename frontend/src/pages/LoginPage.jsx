@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useState, useContext } from 'react';  // Added useContext import
 import AuthContext from '../context/AuthContext';
-import '../assets/login.css';
+import '../assets/Login.css';
 
 const LoginPage = () => {
     const { loginUser } = useContext(AuthContext);  // Accessing loginUser from context

@@ -19,6 +19,7 @@ from django.contrib.auth.models import User
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 import stripe
+from django.db.models import Q
 from django.conf import settings
 from django.http import JsonResponse
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -28,6 +29,38 @@ from django.utils.decorators import method_decorator
 logger = logging.getLogger(__name__)
 from django.views.decorators.http import require_http_methods
 from rest_framework.exceptions import NotFound
+GEMINI_API_KEY = settings.GEMINI_API_KEY
+from django.shortcuts import render
+from django.conf import settings
+import requests
+import google.generativeai as genai
+import logging
+logger = logging.getLogger(__name__)
+api_key = settings.GEMINI_API_KEY
+from base.utils import extract_keywords
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+import google.generativeai as genai
+from PIL import Image
+import io
+from rest_framework.decorators import api_view
+from rest_framework.parsers import MultiPartParser, FormParser
+from base.services import (
+    configure_genai,
+    extract_skincare_details,
+    get_ingredients_for_skin_concerns,
+    search_products_by_ingredients,
+    generate_gemini_response
+)
+
+
+
+
+
+def custom_404(request, exception):
+    return render(request, '404.html', status=404)
+
+
 
 
 @api_view(['POST'])
@@ -56,6 +89,26 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
+
+@api_view(['GET', 'PUT'])
+@permission_classes([IsAuthenticated])
+def get_profile(request):
+    try:
+        profile = request.user.profile
+
+        if request.method == 'GET':
+            serializer = ProfileSerializer(profile)
+            return Response(serializer.data)
+
+        if request.method == 'PUT':
+            serializer = ProfileSerializer(profile, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=400)
+
+    except Profile.DoesNotExist:
+        raise NotFound(detail="Profile not found.")
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -114,6 +167,55 @@ class SkinConcernListView(generics.ListCreateAPIView):
     serializer_class = SkinConcernSerializer
 
 
+@api_view(["POST"])
+def chat_with_recommendations(request):
+    """
+    Handle chat and skincare recommendations based on user input or image.
+    """
+    user_text = request.data.get("text", "").strip()
+    image = request.FILES.get("image")
+
+    if not user_text and not image:
+        return Response({"error": "Text or image input is required."}, status=400)
+
+    try:
+        # Handle text-based input
+        if user_text:
+            if "recommend a product" in user_text.lower() or "help with my skin" in user_text.lower():
+                skincare_details = extract_skincare_details(user_text)
+                
+                if "error" in skincare_details:
+                    return Response({"error": skincare_details["error"]}, status=400)
+                
+                skin_type = skincare_details.get("skin_type")
+                concerns = skincare_details.get("concerns")
+                ingredients_needed = get_ingredients_for_skin_concerns(skin_type, concerns)
+                products = search_products_by_ingredients(ingredients_needed)
+                
+                return Response({"type": "skincare_recommendations", "data": products}, status=200)
+            
+            # General text-based chat response
+            gemini_response = generate_gemini_response(user_text)
+            return Response({"type": "chat_response", "data": gemini_response}, status=200)
+
+        # Handle image-based input
+        if image:
+            pil_image = Image.open(image)
+            pil_image = pil_image.convert("RGB")  # Convert to ensure compatibility
+
+            configure_genai()
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            response = model.generate_content([user_text, pil_image] if user_text else [pil_image])
+            
+            return Response({"type": "image_response", "data": response.text}, status=200)
+    
+    except genai.APIError as e:
+        return Response({"error": f"Gemini API error: {str(e)}"}, status=500)
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+
+
+        
 @require_http_methods(["GET", "POST"])
 def get_payment_status(request, order_id):
     try:
@@ -126,6 +228,7 @@ def get_payment_status(request, order_id):
             return JsonResponse({'status': 'Payment status updated'}, status=200)
     except Order.DoesNotExist:
         return JsonResponse({'error': 'Order not found'}, status=404)
+
 
 class OrderViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['post'])

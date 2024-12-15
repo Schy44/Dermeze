@@ -1,5 +1,5 @@
 import React from 'react';
-import '../assets/home.css' // Importing the CSS file for styling
+import '../assets/Home.css' // Importing the CSS file for styling
 
 const FeatureSection = () => {
   return (

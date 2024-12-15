@@ -1,5 +1,5 @@
 import React from "react";
-import '../assets/home.css' // Include your CSS file for styling
+import '../assets/Home.css' // Include your CSS file for styling
 
 const Herosec = () => {
   return (

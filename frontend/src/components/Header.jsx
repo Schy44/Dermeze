@@ -17,6 +17,7 @@ const Header = () => {
                 </div>
                 <nav className="nav-links">
                     <Link to="/">Home</Link>
+                    <Link to="/chatbot">Bot</Link>
                     <Link to="/productList">Products</Link>
                     <Link to="/cart">
                         Cart <span className="cart-count">({itemCount})</span>
@@ -28,7 +29,11 @@ const Header = () => {
                     ) : (
                         <Link to="/login" className="auth-link">Login</Link>
                     )}
-                    {user && <p className="welcome-message">Hello, {user.username}!</p>}
+                    {user && (
+                        <Link to="/profilepage" className="welcome-message">
+                            Hello, {user.username}!
+                        </Link>
+                    )}
                 </nav>
             </div>
         </header>

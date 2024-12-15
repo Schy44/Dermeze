@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react'; // Added useContext here
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext'; // Import AuthContext for the token
-import '../assets/cart.css';
+import '../assets/Cart.css';
 
 const Cart = () => {
     const { authTokens } = useContext(AuthContext); // Access authTokens

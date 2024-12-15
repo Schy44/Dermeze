@@ -1,0 +1,51 @@
+/* Wrap styles in a unique container */
+.error-container {
+    display: flex;
+    align-items: center;
+    height: 100vh;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.error-container main {
+    flex: 1;
+    text-align: center;
+}
+
+.error-container h1 {
+    font-family: "Fontdiner Swanky", cursive;
+    font-size: 4rem;
+    color: #e865ee;
+}
+
+.error-container p {
+    margin: 2rem 0;
+    font-size: 1.2rem;
+}
+
+.error-container p em {
+    color: #e865ee;
+}
+
+.error-container button {
+    background-color: rgb(140, 208, 227);
+    color: #383838;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    font-size: 1rem;
+    font-family: "Fontdiner Swanky", cursive;
+    cursor: pointer;
+    transition: 0.2s all ease;
+}
+
+.error-container button:hover {
+    background-color: rgb(41, 155, 187);
+    transform: scale(1.1);
+}
+
+/* Ensure this only affects the NotFoundPage */
+body.error-page {
+    background: linear-gradient(to right, white 50%, rgb(140, 208, 227) 70%);
+    font-family: "Roboto", sans-serif;
+    color: white;
+}

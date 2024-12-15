@@ -5,7 +5,7 @@ import { useCart } from '../context/CartContext';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { fetchWithAuth } from '../context/AuthContext';
-import '../assets/checkoutpage.css';
+import '../assets/Checkoutpage.css';
 
 // Load your Stripe public key
 const stripePromise = loadStripe('pk_test_51QP3LDAGfFENmCUes7k1b8WYOeKpDSndEtX8ATF31K1lPBhww4M9LqwEbitz8dfZlL5pC124nFsxpWB1jbMDspHE00kNz7nOux');

@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom'; // To get dynamic route params
-import axios from 'axios'; // For fetching data from the API
-import RatingStars from './RatingStars'; // Assuming you have a rating component
-import '../assets/productdetail.css';
-import Footer from '../components/Footer'; // Footer still included
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
+import RatingStars from './RatingStars';
+import '../assets/Productdetail.css';
+import Footer from '../components/Footer';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 
 const ProductDetail = () => {
-  const { id } = useParams(); // Get product ID from URL
-  const [product, setProduct] = useState(null); // State to store fetched product
-  const [quantity, setQuantity] = useState(1); // Quantity state for the product
-  const { addToCart } = useCart(); // Cart context for adding to the cart
-  const { isWishlisted, addToWishlist, removeFromWishlist } = useWishlist(); // Wishlist context
+  const { id } = useParams();
+  const [product, setProduct] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+  const { addToCart } = useCart();
+  const { isWishlisted, addToWishlist, removeFromWishlist } = useWishlist();
 
   // Fetch product data from the API
   useEffect(() => {
@@ -28,7 +28,7 @@ const ProductDetail = () => {
   }, [id]);
 
   if (!product) {
-    return <div>Loading...</div>; // Loading state while fetching data
+    return <div>Loading...</div>;
   }
 
   const handleAddToCart = () => {
@@ -50,7 +50,7 @@ const ProductDetail = () => {
     }
   };
 
-  // Decrement the quantity (down to 1)
+
   const decrement = () => {
     if (quantity > 1) {
       setQuantity(quantity - 1);

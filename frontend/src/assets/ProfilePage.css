@@ -1,0 +1,86 @@
+/* Profile Page Styling */
+.profile-page-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f5f5f5;
+    font-family: Arial, sans-serif;
+}
+
+.profile-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 400px;
+    text-align: center;
+}
+
+.profile-picture img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-bottom: 20px;
+}
+
+.profile-details {
+    margin-top: 20px;
+}
+
+.profile-details h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.profile-field {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.profile-field label {
+    display: block;
+    font-weight: bold;
+    color: #555;
+}
+
+.profile-field p,
+.profile-field input,
+.profile-field textarea {
+    font-size: 14px;
+    width: 100%;
+    margin-top: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    color: #333;
+}
+
+.profile-field input:focus,
+.profile-field textarea:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+textarea {
+    resize: none;
+}
+
+.profile-actions {
+    margin-top: 20px;
+}
+
+.btn-edit,
+.btn-save {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+}
+
+.btn-edit:hover,
+.btn-save:hover {
+    background-color: #0056b3;
+}
