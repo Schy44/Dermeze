@@ -17,6 +17,8 @@ import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import RoutineMaker from './pages/RoutineMaker';
 import NotFoundPage from './components/404page';
+import NotFoundPage from "./components/404page.jsx"; // Add the correct extension if required
+
 import ProfilePage from './pages/ProfilePage';
 import Chatbot from './components/Chatbot';
 
