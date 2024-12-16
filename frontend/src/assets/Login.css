@@ -1,4 +1,4 @@
-.register-container {
+.login-container {
     width: 100%;
     max-width: 400px;
     margin: 0 auto;
@@ -10,32 +10,32 @@
     text-align: center;
 }
 
-.register-container h2 {
+.login-container h2 {
     font-size: 24px;
     margin-bottom: 20px;
     color: #333;
 }
 
-.register-container .form {
+.login-container .form {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-.register-container .inputGroup {
+.login-container .inputGroup {
     width: 100%;
     margin-bottom: 15px;
     text-align: left;
 }
 
-.register-container .inputGroup label {
-    font-size: 14px;
+.login-container .inputGroup label {
+    font-size: 20px;
     color: #555;
     margin-bottom: 5px;
     display: block;
 }
 
-.register-container .input {
+.login-container .input {
     width: 100%;
     padding: 10px;
     font-size: 14px;
@@ -44,7 +44,7 @@
     box-sizing: border-box;
 }
 
-.register-container .input:focus {
+.login-container .input:focus {
     border-color: rgb(140, 208, 227);
     outline: none;
 }
@@ -55,7 +55,7 @@
     margin-bottom: 15px;
 }
 
-.register-container .button {
+.login-container .button {
     padding: 12px 20px;
     font-size: 16px;
     background-color: rgb(140, 208, 227);
@@ -67,6 +67,23 @@
     width: 100%;
 }
 
-.register-container .button:hover {
-    background-color: rgb(7, 73, 91);
+.login-container .button:hover {
+    background-color: rgb(9, 84, 102);
+}
+
+.login-container .registerButton {
+    padding: 10px 20px;
+    font-size: 14px;
+    background-color: rgb(140, 208, 227);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    margin-top: 15px;
+}
+
+.registerButton:hover {
+    background-color: rgb(9, 84, 102);
 }
