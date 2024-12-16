@@ -61,6 +61,11 @@ def custom_404(request, exception):
     return render(request, '404.html', status=404)
 
 
+from django.http import HttpResponseRedirect
+
+def redirect_to_frontend(request):
+    return HttpResponseRedirect("https://dermeze.netlify.app")
+
 
 
 @api_view(['POST'])
