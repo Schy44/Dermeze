@@ -1,5 +1,5 @@
 import React from "react";
-import '../assets/Home.css'
+import '../assets/Home.css';
 
 
 const collections = [
