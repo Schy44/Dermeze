@@ -32,15 +32,8 @@ SECRET_KEY = 'django-insecure-ss6w8n@mbnh=s@i1fafpf2*+bz931w*12740x%uct55)8efk)s
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    '127.0.0.1',  # for localhost
-    'localhost',  # for localhost
-    '4249-103-146-3-213.ngrok-free.app',  # Add your ngrok URL here
-    'localhost:8000', 
-    'dermeze.onrender.com',
-    'https://dermeze.onrender.com',
-]
 
+ALLOWED_HOSTS = ['*']  
 
 # Application definition
 
