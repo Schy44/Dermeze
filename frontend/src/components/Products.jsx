@@ -28,8 +28,8 @@ const Products = () => {
     setError(null);
     try {
       const url = categoryIds.length
-        ? `http://127.0.0.1:8000/api/products/?categories=${categoryIds.join(',')}&search=${searchTerm}&skin_type=${skinFilter}&brand=${brandFilter}`
-        : `http://127.0.0.1:8000/api/products/?search=${searchTerm}&skin_type=${skinFilter}&brand=${brandFilter}`;
+        ? `https://dermeze.onrender.com/api/products/?categories=${categoryIds.join(',')}&search=${searchTerm}&skin_type=${skinFilter}&brand=${brandFilter}`
+        : `https://dermeze.onrender.com/api/products/?search=${searchTerm}&skin_type=${skinFilter}&brand=${brandFilter}`;
       const response = await fetch(url);
       const data = await response.json();
 
@@ -53,7 +53,7 @@ const Products = () => {
     setLoadingCategories(true);
     setError(null);
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/categories/');
+      const response = await fetch('https://dermeze.onrender.com/api/categories/');
       const data = await response.json();
       setCategories(data);
     } catch (error) {

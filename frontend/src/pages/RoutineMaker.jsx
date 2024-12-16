@@ -32,7 +32,7 @@ const RoutineMaker = () => {
 
         try {
             const promises = step.categories.map((categorySlug) =>
-                axios.get(`http://127.0.0.1:8000/api/categories/${categorySlug}/`)
+                axios.get(`https://dermeze.onrender.com/api/categories/${categorySlug}/`)
             );
             const responses = await Promise.all(promises);
             const allProducts = responses.flatMap((res) => res.data.products || []);

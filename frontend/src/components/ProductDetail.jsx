@@ -18,7 +18,7 @@ const ProductDetail = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/products/${id}/`);
+        const response = await axios.get(`https://dermeze.onrender.com/api/products/${id}/`);
         setProduct(response.data); // Set product data
       } catch (error) {
         console.error("Error fetching product:", error);

@@ -7,7 +7,7 @@ const OrderList = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        axios.get('http://127.0.0.1:8000/api/orders/', {
+        axios.get('https://dermeze.onrender.com/api/orders/', {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         })
             .then(response => {

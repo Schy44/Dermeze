@@ -29,7 +29,7 @@ const OrderConfirmationPage = () => {
 
                 // Fetch order details
                 const orderData = await fetchWithAuth(
-                    `http://127.0.0.1:8000/api/orders/${orderId}/`,
+                    `https://dermeze.onrender.com/api/orders/${orderId}/`,
                     { method: 'GET' },
                     authTokens
                 );
@@ -49,7 +49,7 @@ const OrderConfirmationPage = () => {
                     // Fetch product details for each cart item
                     const productPromises = orderData.cart_items.map((item) =>
                         fetchWithAuth(
-                            `http://127.0.0.1:8000/api/products/${item.product}/`,
+                            `https://dermeze.onrender.com/api/products/${item.product}/`,
                             { method: 'GET' },
                             authTokens
                         )

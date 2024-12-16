@@ -80,7 +80,7 @@ const CheckoutPage = () => {
 
         try {
             // Call the backend to create a payment intent
-            const data = await fetchWithAuth('http://127.0.0.1:8000/api/orders/checkout/', {
+            const data = await fetchWithAuth('https://dermeze.onrender.com/api/orders/checkout/', {
                 method: 'POST',
                 body: JSON.stringify(orderData),
             }, authTokens);
