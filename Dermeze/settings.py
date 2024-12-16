@@ -37,7 +37,8 @@ ALLOWED_HOSTS = [
     'localhost',  # for localhost
     '4249-103-146-3-213.ngrok-free.app',  # Add your ngrok URL here
     'localhost:8000', 
-    'dermeze.onrender.com', 'localhost', '127.0.0.1',# Allow localhost on port 8000
+    'dermeze.onrender.com', 
+    'https://dermeze.netlify.app',
 ]
 
 
