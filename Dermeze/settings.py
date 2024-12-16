@@ -37,6 +37,7 @@ ALLOWED_HOSTS = [
     'localhost',  # for localhost
     '4249-103-146-3-213.ngrok-free.app',  # Add your ngrok URL here
     'localhost:8000', 
+    'dermeze.onrender.com',
     'https://dermeze.onrender.com',
 ]
 
