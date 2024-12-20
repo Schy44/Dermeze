@@ -46,7 +46,7 @@ function Chatbot() {
 
         try {
             // Call the API
-            const response = await axios.post("http://localhost:8000/api/chat/", {
+            const response = await axios.post("https://dermeze.onrender.com/api/chat/", {
                 text: trimmedMessage,
             });
 
