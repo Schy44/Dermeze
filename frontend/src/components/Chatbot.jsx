@@ -46,7 +46,12 @@ function Chatbot() {
         try {
             const response = await axios.post("https://dermeze.onrender.com/api/chat/", {
                 text: trimmedMessage,
+            }, {
+                headers: {
+                    "Content-Type": "application/json",
+                },
             });
+
 
             const { type, data } = response.data;
 
