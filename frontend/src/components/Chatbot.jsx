@@ -37,7 +37,6 @@ function Chatbot() {
             return;
         }
 
-        // Add the user message to the chat
         const newMessages = [...messages, { role: "user", text: trimmedMessage }];
         setMessages(newMessages);
         setUserMessage("");
@@ -45,16 +44,45 @@ function Chatbot() {
         setError(null);
 
         try {
-            // Call the API
             const response = await axios.post("https://dermeze.onrender.com/api/chat/", {
                 text: trimmedMessage,
             });
 
-            const botResponse =
-                response.data.recommendations || response.data.response || "I'm sorry, I didn't understand that.";
+            const { type, data } = response.data;
 
-            // Add bot's response to the chat
-            setMessages((prevMessages) => [...prevMessages, { role: "model", text: botResponse }]);
+            let botResponse;
+            if (type === "chat_response") {
+                botResponse = data;
+            } else if (type === "skincare_recommendations") {
+                botResponse = data.map((product) => (
+                    <div key={product.name}>
+                        <p><strong>Name:</strong> {product.name}</p>
+                        <p><strong>Description:</strong> {product.description}</p>
+                        <p><strong>Price:</strong> ${product.price.toFixed(2)}</p>
+                        {product.ingredients && (
+                            <ul>
+                                {product.ingredients.map((ingredient, i) => (
+                                    <li key={i}>{ingredient}</li>
+                                ))}
+                            </ul>
+                        )}
+                        {product.image_url && (
+                            <img
+                                src={product.image_url}
+                                alt={product.name}
+                                style={{ maxWidth: "100px", borderRadius: "4px" }}
+                            />
+                        )}
+                    </div>
+                ));
+            } else {
+                botResponse = "I'm sorry, I didn't understand that.";
+            }
+
+            setMessages((prevMessages) => [
+                ...prevMessages,
+                { role: "model", text: botResponse },
+            ]);
         } catch (err) {
             console.error("Error sending message:", err);
             setError(err.response?.data?.error || "Network error. Please try again later.");
@@ -63,9 +91,9 @@ function Chatbot() {
         }
     };
 
-    const renderMessage = (msg) => (
+    const renderMessage = (msg, index) => (
         <div
-            key={msg.text}
+            key={index}
             style={{
                 marginBottom: "10px",
                 textAlign: msg.role === "user" ? "right" : "left",
@@ -84,35 +112,7 @@ function Chatbot() {
                     wordWrap: "break-word",
                 }}
             >
-                {Array.isArray(msg.text) ? (
-                    <ul>
-                        {msg.text.map((item, i) => (
-                            <li key={i}>{item}</li>
-                        ))}
-                    </ul>
-                ) : typeof msg.text === "object" ? (
-                    <div>
-                        {msg.text.name && <p><strong>Name:</strong> {msg.text.name}</p>}
-                        {msg.text.description && <p><strong>Description:</strong> {msg.text.description}</p>}
-                        {msg.text.price && <p><strong>Price:</strong> ${msg.text.price.toFixed(2)}</p>}
-                        {msg.text.ingredients && (
-                            <ul>
-                                {msg.text.ingredients.map((ingredient, i) => (
-                                    <li key={i}>{ingredient}</li>
-                                ))}
-                            </ul>
-                        )}
-                        {msg.text.image_url && (
-                            <img
-                                src={msg.text.image_url}
-                                alt={msg.text.name}
-                                style={{ maxWidth: "100px", borderRadius: "4px" }}
-                            />
-                        )}
-                    </div>
-                ) : (
-                    <p>{msg.text}</p>
-                )}
+                {Array.isArray(msg.text) ? msg.text : <p>{msg.text}</p>}
             </div>
         </div>
     );
@@ -162,7 +162,10 @@ function Chatbot() {
                 <input
                     type="text"
                     value={userMessage}
-                    onChange={(e) => setUserMessage(e.target.value)}
+                    onChange={(e) => {
+                        setUserMessage(e.target.value);
+                        setError(null); // Clear error when typing
+                    }}
                     placeholder="Type a message..."
                     onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
                     style={{
