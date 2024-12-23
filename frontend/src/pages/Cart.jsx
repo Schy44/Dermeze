@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react'; // Added useContext here
+import React, { useState, useContext } from 'react';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext'; // Import AuthContext for the token
@@ -66,9 +66,18 @@ const Cart = () => {
                                 </div>
                                 <div className="item-quantity">
                                     <div className="quantity-controls">
-                                        <button onClick={() => updateQuantity(item.id, item.quantity - 1)}>-</button>
+                                        <button
+                                            onClick={() => item.quantity > 1 && updateQuantity(item.id, item.quantity - 1)}
+                                            disabled={item.quantity === 1} // Prevent going below 1
+                                        >
+                                            -
+                                        </button>
                                         <span>{item.quantity}</span>
-                                        <button onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</button>
+                                        <button
+                                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                        >
+                                            +
+                                        </button>
                                     </div>
                                     <button className="remove-btn" onClick={() => removeFromCart(item.id)}>
                                         Remove
@@ -112,7 +121,6 @@ const Cart = () => {
                 </>
             )}
         </div>
-
     );
 };
 
