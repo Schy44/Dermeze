@@ -50,6 +50,11 @@ const Cart = () => {
 
     return (
         <div className="cart-container">
+            {/* Discount Code Banner */}
+            <div className="discount-banner">
+                Use code <strong>DISCOUNT10</strong> for 10% off your total!
+            </div>
+
             <h2>Cart</h2>
             {cartItems.length === 0 ? (
                 <p>Your cart is empty.</p>
