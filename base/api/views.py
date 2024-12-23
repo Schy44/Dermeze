@@ -68,6 +68,18 @@ def redirect_to_frontend(request):
 
 
 
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_orders(request):
+    user = request.user
+    orders = Order.objects.filter(user=user)  
+    serialized_orders = OrderSerializer(orders, many=True)
+    return Response(serialized_orders.data)
+
+
+
 @api_view(['POST'])
 def register_user(request):
     serializer = RegisterSerializer(data=request.data)
