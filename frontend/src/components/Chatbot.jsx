@@ -54,19 +54,31 @@ function Chatbot() {
         setError(null);
 
         try {
-            // Create form data
-            const formData = new FormData();
-            formData.append("text", trimmedMessage);
-            if (selectedImage) {
-                formData.append("image", selectedImage);
-            }
+            // Prepare the payload as JSON
+            const payload = {
+                text: trimmedMessage, // Send text as part of the JSON payload
+            };
 
-            // Send message to backend
-            const response = await axios.post("https://dermeze.onrender.com/api/chat/", formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
+            // If an image is selected, append it to the form data
+            if (selectedImage) {
+                const formData = new FormData();
+                formData.append("text", trimmedMessage);
+                formData.append("image", selectedImage);
+
+                // Send the message to backend with form data
+                const response = await axios.post("https://dermeze.onrender.com/api/chat/", formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                });
+            } else {
+                // Send the message to backend with JSON payload
+                const response = await axios.post("https://dermeze.onrender.com/api/chat/", payload, {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
+            }
 
             // Handle backend response
             const { type, data } = response.data;
@@ -100,7 +112,7 @@ function Chatbot() {
                 botResponse = "I'm sorry, I didn't understand that.";
             }
 
-            // Update messages
+            // Update messages with bot response
             setMessages((prevMessages) => [
                 ...prevMessages,
                 { role: "bot", text: botResponse },
