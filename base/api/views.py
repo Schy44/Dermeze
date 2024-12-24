@@ -48,7 +48,6 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from base.services import (
     configure_genai,
     extract_skincare_details,
-    get_ingredients_for_skin_concerns,
     search_products_by_ingredients,
     generate_gemini_response
 )
@@ -206,7 +205,12 @@ def chat_with_recommendations(request):
                 
                 skin_type = skincare_details.get("skin_type")
                 concerns = skincare_details.get("concerns")
-                ingredients_needed = get_ingredients_for_skin_concerns(skin_type, concerns)
+                
+                # Generate ingredients using Gemini API
+                user_concerns_text = f"Suggest ingredients for {skin_type} and concerns: {', '.join(concerns)}"
+                ingredients_needed = generate_gemini_response(user_concerns_text)
+                
+                # Search for matching products in the database
                 products = search_products_by_ingredients(ingredients_needed)
                 
                 return Response({"type": "skincare_recommendations", "data": products}, status=200)

@@ -157,7 +157,7 @@ function Chatbot() {
             <div
                 ref={chatRef}
                 style={{
-                    height: "800px",
+                    height: "700px",
                     overflowY: "auto",
                     border: "1px solid #ccc",
                     borderRadius: "8px",

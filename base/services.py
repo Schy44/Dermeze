@@ -6,14 +6,12 @@ from django.db.models import Q
 from django.conf import settings
 from .models import Product
 
-
 def configure_genai():
     """Configure the Gemini API key."""
     api_key = settings.GEMINI_API_KEY
     if not api_key:
         raise ValueError("API key not found in settings.")
     genai.configure(api_key=api_key)
-
 
 def extract_skincare_details(user_input):
     """
@@ -42,7 +40,6 @@ def extract_skincare_details(user_input):
     
     return {"skin_type": skin_type, "concerns": concerns}
 
-
 def search_products_by_ingredients(ingredients):
     if not ingredients:
         return [{"message": "No matching ingredients provided."}]
@@ -63,43 +60,17 @@ def search_products_by_ingredients(ingredients):
         for product in products
     ] if products.exists() else [{"message": "No matching products found."}]
 
-
 def generate_gemini_response(user_input):
     """
-    Generate a response from the Gemini model (AI).
+    Use Gemini API to determine suitable ingredients/products for skincare concerns.
     """
     try:
         configure_genai()
         model = genai.GenerativeModel("gemini-1.5-flash")
         response = model.generate_content(user_input)
-        return response.text
+        # Parse the response to extract ingredient suggestions (if applicable)
+        return response.text.split(",")  # Assuming Gemini returns ingredients as comma-separated values
     except genai.APIError as e:
         return f"Gemini API error: {str(e)}"
     except Exception as e:
         return f"Unexpected error: {str(e)}"
-
-
-def get_ingredients_for_skin_concerns(skin_type, concerns):
-    """
-    Based on the skin type and concerns, return a list of ingredients.
-    """
-    ingredient_map = {
-        "dry skin": ["hyaluronic acid", "glycerin", "ceramides", "squalane", "avocado oil"],
-        "oily skin": ["salicylic acid", "benzoyl peroxide", "niacinamide", "retinol"],
-        "acne": ["salicylic acid", "benzoyl peroxide", "retinol", "tea tree oil"],
-        "sensitive skin": ["calendula", "chamomile", "niacinamide", "ceramides"],
-        "eczema": ["colloidal oatmeal", "ceramides", "shea butter", "sunflower seed oil"],
-        "wrinkles": ["retinol", "peptides", "hyaluronic acid", "vitamin C"],
-        "dark spots": ["vitamin C", "niacinamide", "alpha arbutin", "licorice extract"],
-        "sunburn": ["aloe vera", "calendula", "vitamin E"]
-    }
-    
-    ingredients_needed = set()
-    
-    if skin_type:
-        ingredients_needed.update(ingredient_map.get(skin_type, []))
-    
-    for concern in concerns:
-        ingredients_needed.update(ingredient_map.get(concern, []))
-    
-    return list(ingredients_needed) if ingredients_needed else ["No ingredients found for your concerns."]
