@@ -186,52 +186,36 @@ class SkinConcernListView(generics.ListCreateAPIView):
 @api_view(["POST"])
 def chat_with_recommendations(request):
     """
-    Handle chat and skincare recommendations based on user input or image.
+    Handle chat and skincare recommendations based on user input.
     """
     user_text = request.data.get("text", "").strip()
-    image = request.FILES.get("image")
 
-    if not user_text and not image:
-        return Response({"error": "Text or image input is required."}, status=400)
+    if not user_text:
+        return Response({"error": "Text input is required."}, status=400)
 
     try:
-        # Handle text-based input
-        if user_text:
-            if "recommend a product" in user_text.lower() or "help with my skin" in user_text.lower():
-                skincare_details = extract_skincare_details(user_text)
-                
-                if "error" in skincare_details:
-                    return Response({"error": skincare_details["error"]}, status=400)
-                
-                skin_type = skincare_details.get("skin_type")
-                concerns = skincare_details.get("concerns")
-                
-                # Generate ingredients using Gemini API
-                user_concerns_text = f"Suggest ingredients for {skin_type} and concerns: {', '.join(concerns)}"
-                ingredients_needed = generate_gemini_response(user_concerns_text)
-                
-                # Search for matching products in the database
-                products = search_products_by_ingredients(ingredients_needed)
-                
-                return Response({"type": "skincare_recommendations", "data": products}, status=200)
+        if "recommend a product" in user_text.lower() or "help with my skin" in user_text.lower():
+            skincare_details = extract_skincare_details(user_text)
             
-            # General text-based chat response
-            gemini_response = generate_gemini_response(user_text)
-            return Response({"type": "chat_response", "data": gemini_response}, status=200)
-
-        # Handle image-based input
-        if image:
-            pil_image = Image.open(image)
-            pil_image = pil_image.convert("RGB")  # Convert to ensure compatibility
-
-            configure_genai()
-            model = genai.GenerativeModel("gemini-1.5-flash")
-            response = model.generate_content([user_text, pil_image] if user_text else [pil_image])
+            if "error" in skincare_details:
+                return Response({"error": skincare_details["error"]}, status=400)
             
-            return Response({"type": "image_response", "data": response.text}, status=200)
+            skin_type = skincare_details.get("skin_type")
+            concerns = skincare_details.get("concerns")
+            
+            # Generate ingredients using Gemini API
+            user_concerns_text = f"Suggest ingredients for {skin_type} skin and concerns: {', '.join(concerns)}"
+            ingredients_needed = generate_gemini_response(user_concerns_text)
+            
+            # Search for matching products in the database
+            products = search_products_by_ingredients(ingredients_needed)
+            
+            return Response({"type": "skincare_recommendations", "data": products}, status=200)
+        
+        # General text-based chat response
+        gemini_response = generate_gemini_response(user_text)
+        return Response({"type": "chat_response", "data": gemini_response}, status=200)
     
-    except genai.APIError as e:
-        return Response({"error": f"Gemini API error: {str(e)}"}, status=500)
     except Exception as e:
         return Response({"error": str(e)}, status=500)
 

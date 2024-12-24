@@ -38,12 +38,11 @@ function Chatbot() {
             return;
         }
 
+        // Prepare new message
         const newMessages = [...messages];
-
         if (trimmedMessage) {
             newMessages.push({ role: "user", text: trimmedMessage });
         }
-
         if (selectedImage) {
             newMessages.push({ role: "user", text: "[Image uploaded]", image: selectedImage });
         }
@@ -55,26 +54,29 @@ function Chatbot() {
         setError(null);
 
         try {
+            // Create form data
             const formData = new FormData();
             formData.append("text", trimmedMessage);
             if (selectedImage) {
                 formData.append("image", selectedImage);
             }
 
+            // Send message to backend
             const response = await axios.post("https://dermeze.onrender.com/api/chat/", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
             });
 
+            // Handle backend response
             const { type, data } = response.data;
-
             let botResponse;
+
             if (type === "chat_response") {
                 botResponse = data;
             } else if (type === "skincare_recommendations") {
-                botResponse = data.map((product) => (
-                    <div key={product.name}>
+                botResponse = data.map((product, index) => (
+                    <div key={index}>
                         <p><strong>Name:</strong> {product.name}</p>
                         <p><strong>Description:</strong> {product.description}</p>
                         <p><strong>Price:</strong> ${product.price.toFixed(2)}</p>
@@ -98,15 +100,23 @@ function Chatbot() {
                 botResponse = "I'm sorry, I didn't understand that.";
             }
 
+            // Update messages
             setMessages((prevMessages) => [
                 ...prevMessages,
-                { role: "model", text: botResponse },
+                { role: "bot", text: botResponse },
             ]);
         } catch (err) {
             console.error("Error sending message:", err);
             setError(err.response?.data?.error || "Network error. Please try again later.");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleImageUpload = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            setSelectedImage(file);
         }
     };
 
@@ -143,13 +153,6 @@ function Chatbot() {
             </div>
         </div>
     );
-
-    const handleImageUpload = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            setSelectedImage(file);
-        }
-    };
 
     return (
         <div style={{ maxWidth: "500px", margin: "0 auto", fontFamily: "Arial, sans-serif" }}>

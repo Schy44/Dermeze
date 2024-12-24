@@ -1,10 +1,9 @@
-import google.generativeai as genai
-from PIL import Image
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.db.models import Q
 from django.conf import settings
 from .models import Product
+import google.generativeai as genai
 
 def configure_genai():
     """Configure the Gemini API key."""
@@ -27,9 +26,9 @@ def extract_skincare_details(user_input):
     
     # Extract skin type
     skin_type = None
-    for type in skin_types:
-        if type in user_input:
-            skin_type = type
+    for stype in skin_types:
+        if stype in user_input:
+            skin_type = stype
             break
     
     # Extract skin concerns
@@ -41,6 +40,9 @@ def extract_skincare_details(user_input):
     return {"skin_type": skin_type, "concerns": concerns}
 
 def search_products_by_ingredients(ingredients):
+    """
+    Search for products matching the suggested ingredients in the database.
+    """
     if not ingredients:
         return [{"message": "No matching ingredients provided."}]
     
@@ -48,7 +50,7 @@ def search_products_by_ingredients(ingredients):
     for ingredient in ingredients:
         query |= Q(ingredients__icontains=ingredient)
     
-    products = Product.objects.filter(query).distinct()[:10]  # Limit results for efficiency
+    products = Product.objects.filter(query).distinct()[:10]  # Limit results
     return [
         {
             "name": product.name,
@@ -68,9 +70,9 @@ def generate_gemini_response(user_input):
         configure_genai()
         model = genai.GenerativeModel("gemini-1.5-flash")
         response = model.generate_content(user_input)
-        # Parse the response to extract ingredient suggestions (if applicable)
+        # Parse the response to extract ingredient suggestions
         return response.text.split(",")  # Assuming Gemini returns ingredients as comma-separated values
     except genai.APIError as e:
         return f"Gemini API error: {str(e)}"
     except Exception as e:
-        return f"Unexpected error: {str(e)}"
+        return f"Unexpected error: {str(e)}" 
