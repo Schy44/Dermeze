@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../assets/Profile.css";
+import "../assets/ProfilePage.css";
 
 const ProfilePage = () => {
     const [orders, setOrders] = useState([]);
@@ -15,7 +15,7 @@ const ProfilePage = () => {
         setError(null);
 
         try {
-            const response = await fetch("https://dermeze.onrender.com/api/orders/", {
+            const response = await fetch(" https://dermeze.onrender.com/api/orders/", {
                 headers: {
                     Authorization: `Bearer ${token}`,  // Include the token in the header
                 },

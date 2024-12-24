@@ -25,7 +25,7 @@ function HomePage() {
 
   const getProfile = async () => {
     try {
-      const response = await fetch('https://dermeze.onrender.com/api/profile/', {
+      const response = await fetch(' https://dermeze.onrender.com/api/profile/', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${authTokens?.access}`,
@@ -42,7 +42,7 @@ function HomePage() {
 
   const getProducts = async () => {
     try {
-      const response = await fetch('https://dermeze.onrender.com/api/products/', {
+      const response = await fetch(' https://dermeze.onrender.com/api/products/', {
         method: 'GET',
       });
       if (!response.ok) throw new Error('Failed to fetch products');

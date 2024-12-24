@@ -6,6 +6,7 @@ function Chatbot() {
     const [userMessage, setUserMessage] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [selectedImage, setSelectedImage] = useState(null);
     const chatRef = useRef(null);
 
     // Auto-scroll to the bottom of the chat
@@ -30,28 +31,41 @@ function Chatbot() {
 
     const handleSendMessage = async () => {
         const trimmedMessage = userMessage.trim();
-        if (!trimmedMessage) return;
+        if (!trimmedMessage && !selectedImage) return;
 
         if (trimmedMessage.length > 500) {
             setError("Message is too long. Please limit to 500 characters.");
             return;
         }
 
-        const newMessages = [...messages, { role: "user", text: trimmedMessage }];
+        const newMessages = [...messages];
+
+        if (trimmedMessage) {
+            newMessages.push({ role: "user", text: trimmedMessage });
+        }
+
+        if (selectedImage) {
+            newMessages.push({ role: "user", text: "[Image uploaded]", image: selectedImage });
+        }
+
         setMessages(newMessages);
         setUserMessage("");
+        setSelectedImage(null);
         setLoading(true);
         setError(null);
 
         try {
-            const response = await axios.post("https://dermeze.onrender.com/api/chat/", {
-                text: trimmedMessage,
-            }, {
+            const formData = new FormData();
+            formData.append("text", trimmedMessage);
+            if (selectedImage) {
+                formData.append("image", selectedImage);
+            }
+
+            const response = await axios.post("https://dermeze.onrender.com/api/chat/", formData, {
                 headers: {
-                    "Content-Type": "application/json",
+                    "Content-Type": "multipart/form-data",
                 },
             });
-
 
             const { type, data } = response.data;
 
@@ -117,10 +131,25 @@ function Chatbot() {
                     wordWrap: "break-word",
                 }}
             >
-                {Array.isArray(msg.text) ? msg.text : <p>{msg.text}</p>}
+                {msg.image ? (
+                    <img
+                        src={URL.createObjectURL(msg.image)}
+                        alt="User upload"
+                        style={{ maxWidth: "100%", borderRadius: "4px" }}
+                    />
+                ) : (
+                    Array.isArray(msg.text) ? msg.text : <p>{msg.text}</p>
+                )}
             </div>
         </div>
     );
+
+    const handleImageUpload = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            setSelectedImage(file);
+        }
+    };
 
     return (
         <div style={{ maxWidth: "500px", margin: "0 auto", fontFamily: "Arial, sans-serif" }}>
@@ -128,7 +157,7 @@ function Chatbot() {
             <div
                 ref={chatRef}
                 style={{
-                    height: "400px",
+                    height: "800px",
                     overflowY: "auto",
                     border: "1px solid #ccc",
                     borderRadius: "8px",
@@ -199,6 +228,27 @@ function Chatbot() {
                 >
                     {loading ? <span className="spinner"></span> : "Send"}
                 </button>
+                <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    style={{ display: "none" }}
+                    id="image-upload"
+                />
+                <label
+                    htmlFor="image-upload"
+                    style={{
+                        padding: "10px 20px",
+                        backgroundColor: "#28a745",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        fontSize: "14px",
+                    }}
+                >
+                    Upload Image
+                </label>
             </div>
         </div>
     );

@@ -28,8 +28,8 @@ const Products = () => {
     setError(null);
     try {
       const url = categoryIds.length
-        ? `https://dermeze.onrender.com/api/products/?categories=${categoryIds.join(',')}&search=${searchTerm}&skin_type=${skinFilter}&brand=${brandFilter}`
-        : `https://dermeze.onrender.com/api/products/?search=${searchTerm}&skin_type=${skinFilter}&brand=${brandFilter}`;
+        ? ` https://dermeze.onrender.com/api/products/?categories=${categoryIds.join(',')}&search=${searchTerm}&skin_type=${skinFilter}&brand=${brandFilter}`
+        : ` https://dermeze.onrender.com/api/products/?search=${searchTerm}&skin_type=${skinFilter}&brand=${brandFilter}`;
       const response = await fetch(url);
       const data = await response.json();
 

@@ -30,7 +30,7 @@ const RoutineMaker = () => {
 
         try {
             const promises = step.categories.map((categorySlug) =>
-                axios.get(`https://dermeze.onrender.com/api/categories/${categorySlug}/`)
+                axios.get(` https://dermeze.onrender.com/api/categories/${categorySlug}/`)
             );
             const responses = await Promise.all(promises);
             const allProducts = responses.flatMap((res) => res.data.products || []);

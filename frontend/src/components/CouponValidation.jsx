@@ -8,7 +8,7 @@ const CouponValidation = () => {
 
     const handleCouponSubmit = (e) => {
         e.preventDefault();
-        axios.post('https://dermeze.onrender.com/api/validate_coupon/', { code: couponCode })
+        axios.post(' https://dermeze.onrender.com/api/validate_coupon/', { code: couponCode })
             .then(response => {
                 setDiscountValue(response.data.discount_value);
                 setError(null);
