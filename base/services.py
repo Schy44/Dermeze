@@ -35,7 +35,7 @@ def extract_skincare_details(user_input):
     concerns = [concern for concern in skincare_concerns if concern in user_input]
 
     if not skin_type and not concerns:
-        return {"error": "Could not identify your skin type or concerns. Please try again with more specific information."}
+        return {"error": "Could not identify your skin type or concerns. Please provide more specific information."}
     
     return {"skin_type": skin_type, "concerns": concerns}
 
@@ -70,9 +70,8 @@ def generate_gemini_response(user_input):
         configure_genai()
         model = genai.GenerativeModel("gemini-1.5-flash")
         response = model.generate_content(user_input)
-        # Parse the response to extract ingredient suggestions
         return response.text.split(",")  # Assuming Gemini returns ingredients as comma-separated values
     except genai.APIError as e:
         return f"Gemini API error: {str(e)}"
     except Exception as e:
-        return f"Unexpected error: {str(e)}" 
+        return f"Unexpected error: {str(e)}"

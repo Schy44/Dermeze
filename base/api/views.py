@@ -181,8 +181,6 @@ class CategoryListView(generics.ListAPIView):
 class SkinConcernListView(generics.ListCreateAPIView):
     queryset = SkinConcern.objects.all()
     serializer_class = SkinConcernSerializer
-
-
 @api_view(["POST"])
 def chat_with_recommendations(request):
     """
@@ -191,7 +189,7 @@ def chat_with_recommendations(request):
     user_text = request.data.get("text", "").strip()
 
     if not user_text:
-        return Response({"error": "Text input is required."}, status=400)
+        return Response({"error": "Please provide more details about your skin concerns."}, status=400)
 
     try:
         if "recommend a product" in user_text.lower() or "help with my skin" in user_text.lower():
@@ -210,17 +208,29 @@ def chat_with_recommendations(request):
             # Search for matching products in the database
             products = search_products_by_ingredients(ingredients_needed)
             
-            return Response({"type": "skincare_recommendations", "data": products}, status=200)
+            # Construct a user-friendly response
+            if products:
+                product_list = "\n".join([f"• {product['name']}: {product['description']} (Price: {product['price']})" for product in products])
+                return Response({
+                    "type": "skincare_recommendations",
+                    "message": f"Based on your skin type and concerns, here are some products you may find helpful:\n\n{product_list}"
+                }, status=200)
+            else:
+                return Response({
+                    "type": "skincare_recommendations",
+                    "message": "We couldn't find any products that match your needs right now. Please try again later."
+                }, status=200)
         
         # General text-based chat response
         gemini_response = generate_gemini_response(user_text)
-        return Response({"type": "chat_response", "data": gemini_response}, status=200)
+        return Response({
+            "type": "chat_response",
+            "message": gemini_response
+        }, status=200)
     
     except Exception as e:
-        return Response({"error": str(e)}, status=500)
+        return Response({"error": f"Something went wrong: {str(e)}"}, status=500)
 
-
-        
 @require_http_methods(["GET", "POST"])
 def get_payment_status(request, order_id):
     try:
