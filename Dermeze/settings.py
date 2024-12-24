@@ -52,7 +52,8 @@ INSTALLED_APPS = [
 
 
 CORS_ALLOWED_ORIGINS = [
-    'https://dermeze.netlify.app',  
+    'https://dermeze.netlify.app', 
+     "http://localhost:3000", 
     
 ]
 

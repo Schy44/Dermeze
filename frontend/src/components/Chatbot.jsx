@@ -9,6 +9,9 @@ function Chatbot() {
     const [selectedImage, setSelectedImage] = useState(null);
     const chatRef = useRef(null);
 
+    const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://dermeze.onrender.com";
+    const MAX_MESSAGE_LENGTH = 500;
+
     // Auto-scroll to the bottom of the chat
     useEffect(() => {
         if (chatRef.current) {
@@ -29,23 +32,27 @@ function Chatbot() {
         localStorage.setItem("chatMessages", JSON.stringify(messages));
     }, [messages]);
 
+    // Revoke object URL to prevent memory leaks
+    useEffect(() => {
+        return () => {
+            if (selectedImage) {
+                URL.revokeObjectURL(selectedImage);
+            }
+        };
+    }, [selectedImage]);
+
     const handleSendMessage = async () => {
         const trimmedMessage = userMessage.trim();
         if (!trimmedMessage && !selectedImage) return;
 
-        if (trimmedMessage.length > 500) {
-            setError("Message is too long. Please limit to 500 characters.");
+        if (trimmedMessage.length > MAX_MESSAGE_LENGTH) {
+            setError(`Message is too long. Please limit to ${MAX_MESSAGE_LENGTH} characters.`);
             return;
         }
 
-        // Prepare new message
         const newMessages = [...messages];
-        if (trimmedMessage) {
-            newMessages.push({ role: "user", text: trimmedMessage });
-        }
-        if (selectedImage) {
-            newMessages.push({ role: "user", text: "[Image uploaded]", image: selectedImage });
-        }
+        if (trimmedMessage) newMessages.push({ role: "user", text: trimmedMessage });
+        if (selectedImage) newMessages.push({ role: "user", text: "[Image uploaded]", image: selectedImage });
 
         setMessages(newMessages);
         setUserMessage("");
@@ -54,36 +61,24 @@ function Chatbot() {
         setError(null);
 
         try {
-            // Prepare the payload as JSON
-            const payload = {
-                text: trimmedMessage, // Send text as part of the JSON payload
-            };
-
-            // If an image is selected, append it to the form data
+            let response;
             if (selectedImage) {
                 const formData = new FormData();
                 formData.append("text", trimmedMessage);
                 formData.append("image", selectedImage);
 
-                // Send the message to backend with form data
-                const response = await axios.post("https://dermeze.onrender.com/api/chat/", formData, {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
+                response = await axios.post(`${API_BASE_URL}/api/chat/`, formData, {
+                    headers: { "Content-Type": "multipart/form-data" },
                 });
             } else {
-                // Send the message to backend with JSON payload
-                const response = await axios.post("https://dermeze.onrender.com/api/chat/", payload, {
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
+                const payload = { text: trimmedMessage };
+                response = await axios.post(`${API_BASE_URL}/api/chat/`, payload, {
+                    headers: { "Content-Type": "application/json" },
                 });
             }
 
-            // Handle backend response
             const { type, data } = response.data;
             let botResponse;
-
             if (type === "chat_response") {
                 botResponse = data;
             } else if (type === "skincare_recommendations") {
@@ -112,7 +107,6 @@ function Chatbot() {
                 botResponse = "I'm sorry, I didn't understand that.";
             }
 
-            // Update messages with bot response
             setMessages((prevMessages) => [
                 ...prevMessages,
                 { role: "bot", text: botResponse },
@@ -156,7 +150,7 @@ function Chatbot() {
                 {msg.image ? (
                     <img
                         src={URL.createObjectURL(msg.image)}
-                        alt="User upload"
+                        alt="Uploaded by user"
                         style={{ maxWidth: "100%", borderRadius: "4px" }}
                     />
                 ) : (
@@ -241,7 +235,7 @@ function Chatbot() {
                     disabled={loading}
                     aria-label="Send message"
                 >
-                    {loading ? <span className="spinner"></span> : "Send"}
+                    {loading ? "Sending..." : "Send"}
                 </button>
                 <input
                     type="file"
