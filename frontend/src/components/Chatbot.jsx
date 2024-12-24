@@ -32,15 +32,6 @@ function Chatbot() {
         localStorage.setItem("chatMessages", JSON.stringify(messages));
     }, [messages]);
 
-    // Revoke object URL to prevent memory leaks
-    useEffect(() => {
-        return () => {
-            if (selectedImage) {
-                URL.revokeObjectURL(selectedImage);
-            }
-        };
-    }, [selectedImage]);
-
     const handleSendMessage = async () => {
         const trimmedMessage = userMessage.trim();
         if (!trimmedMessage && !selectedImage) return;
@@ -51,8 +42,12 @@ function Chatbot() {
         }
 
         const newMessages = [...messages];
-        if (trimmedMessage) newMessages.push({ role: "user", text: trimmedMessage });
-        if (selectedImage) newMessages.push({ role: "user", text: "[Image uploaded]", image: selectedImage });
+        if (trimmedMessage) {
+            newMessages.push({ role: "user", text: trimmedMessage });
+        }
+        if (selectedImage) {
+            newMessages.push({ role: "user", text: "[Image uploaded]", image: selectedImage });
+        }
 
         setMessages(newMessages);
         setUserMessage("");
@@ -61,7 +56,12 @@ function Chatbot() {
         setError(null);
 
         try {
-            let response;
+            // Prepare the payload as JSON
+            const payload = {
+                text: trimmedMessage, // Send text as part of the JSON payload
+            };
+
+            // If an image is selected, append it to the form data
             if (selectedImage) {
                 const formData = new FormData();
                 formData.append("text", trimmedMessage);
