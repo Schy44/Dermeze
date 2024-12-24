@@ -16,19 +16,6 @@ function Chatbot() {
         }
     }, [messages]);
 
-    // Load chat history from localStorage on mount
-    useEffect(() => {
-        const savedMessages = localStorage.getItem("chatMessages");
-        if (savedMessages) {
-            setMessages(JSON.parse(savedMessages));
-        }
-    }, []);
-
-    // Save chat history to localStorage on message update
-    useEffect(() => {
-        localStorage.setItem("chatMessages", JSON.stringify(messages));
-    }, [messages]);
-
     const handleSendMessage = async () => {
         const trimmedMessage = userMessage.trim();
         if (!trimmedMessage && !selectedImage) return;
@@ -40,12 +27,7 @@ function Chatbot() {
 
         // Prepare new message
         const newMessages = [...messages];
-        if (trimmedMessage) {
-            newMessages.push({ role: "user", text: trimmedMessage });
-        }
-        if (selectedImage) {
-            newMessages.push({ role: "user", text: "[Image uploaded]", image: selectedImage });
-        }
+        newMessages.push({ role: "user", text: trimmedMessage });
 
         setMessages(newMessages);
         setUserMessage("");
@@ -54,7 +36,7 @@ function Chatbot() {
         setError(null);
 
         try {
-            // Prepare the payload as JSON
+            // Prepare the payload as JSON in the required format
             const payload = {
                 text: trimmedMessage, // Send text as part of the JSON payload
             };
