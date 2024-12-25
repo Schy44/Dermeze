@@ -54,6 +54,59 @@ from base.services import (
     
 )
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+@csrf_exempt
+def cart_view(request):
+    if 'cart' not in request.session:
+        request.session['cart'] = {}
+
+    if request.method == 'GET':
+        # Retrieve the cart
+        return JsonResponse(request.session['cart'], safe=False)
+
+    elif request.method == 'POST':
+        # Add an item to the cart
+        data = json.loads(request.body)
+        product_id = str(data.get('product_id'))
+        quantity = data.get('quantity', 1)
+
+        if product_id in request.session['cart']:
+            request.session['cart'][product_id] += quantity
+        else:
+            request.session['cart'][product_id] = quantity
+
+        request.session.modified = True
+        return JsonResponse({'message': 'Item added to cart'})
+
+    elif request.method == 'PUT':
+        # Update item quantity
+        data = json.loads(request.body)
+        product_id = str(data.get('product_id'))
+        quantity = data.get('quantity', 1)
+
+        if product_id in request.session['cart']:
+            request.session['cart'][product_id] = quantity
+            request.session.modified = True
+            return JsonResponse({'message': 'Cart updated'})
+        else:
+            return JsonResponse({'error': 'Product not in cart'}, status=404)
+
+    elif request.method == 'DELETE':
+        # Remove an item from the cart
+        data = json.loads(request.body)
+        product_id = str(data.get('product_id'))
+
+        if product_id in request.session['cart']:
+            del request.session['cart'][product_id]
+            request.session.modified = True
+            return JsonResponse({'message': 'Item removed from cart'})
+        else:
+            return JsonResponse({'error': 'Product not in cart'}, status=404)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
 
 
 def custom_404(request, exception):

@@ -4,7 +4,7 @@ from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework.routers import DefaultRouter
 from base.api.views import (
-    MyTokenObtainPairView, get_profile, register_user,
+    MyTokenObtainPairView, cart_view, get_profile, register_user,
     ProductListView, ProductDetailView, CategoryListView,
     SkinConcernListView, OrderViewSet, chat_with_recommendations,
 )
@@ -28,6 +28,7 @@ urlpatterns = [
     path('chat/', chat_with_recommendations, name='chat'),
     
     # Product and category APIs
+    path('cart/', cart_view, name='cart'),
     path('products/', ProductListView.as_view(), name='product-list'),
     path('products/<int:id>/', ProductDetailView.as_view(), name='product-detail'),
     path('categories/', CategoryListView.as_view(), name='category-list'),

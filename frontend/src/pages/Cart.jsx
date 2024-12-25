@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext'; // Import AuthContext for the token
@@ -11,6 +11,25 @@ const Cart = () => {
     const [couponCode, setCouponCode] = useState('');
     const [discount, setDiscount] = useState(0);
     const [couponError, setCouponError] = useState('');
+
+    // On Component Mount: Persist cart data from sessionStorage or initialize empty cart
+    useEffect(() => {
+        const savedCart = JSON.parse(sessionStorage.getItem('cart'));
+        if (savedCart) {
+            // If there's a cart in sessionStorage, load it into the state
+            for (let item of savedCart) {
+                // Add saved items to the context or local state
+                addItemToCart(item);
+            }
+        }
+    }, []);
+
+    // Save cart to sessionStorage on every change
+    useEffect(() => {
+        if (cartItems.length > 0) {
+            sessionStorage.setItem('cart', JSON.stringify(cartItems));
+        }
+    }, [cartItems]);
 
     const handleCouponSubmit = (e) => {
         e.preventDefault();
