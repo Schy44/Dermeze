@@ -6,7 +6,6 @@ function Chatbot() {
     const [userMessage, setUserMessage] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [selectedImage, setSelectedImage] = useState(null);
     const chatRef = useRef(null);
 
     const userId = localStorage.getItem("userId") || Math.random().toString(36).substr(2, 9); // Unique user ID (if not present in localStorage)
@@ -37,7 +36,7 @@ function Chatbot() {
 
     const handleSendMessage = async () => {
         const trimmedMessage = userMessage.trim();
-        if (!trimmedMessage && !selectedImage) return;
+        if (!trimmedMessage) return;
 
         if (trimmedMessage.length > MAX_MESSAGE_LENGTH) {
             setError(`Message is too long. Please limit to ${MAX_MESSAGE_LENGTH} characters.`);
@@ -45,16 +44,10 @@ function Chatbot() {
         }
 
         const newMessages = [...messages];
-        if (trimmedMessage) {
-            newMessages.push({ role: "user", text: trimmedMessage });
-        }
-        if (selectedImage) {
-            newMessages.push({ role: "user", text: "[Image uploaded]", image: selectedImage });
-        }
+        newMessages.push({ role: "user", text: trimmedMessage });
 
         setMessages(newMessages);
         setUserMessage("");
-        setSelectedImage(null);
         setLoading(true);
         setError(null);
 
@@ -64,21 +57,10 @@ function Chatbot() {
                 text: trimmedMessage, // Send text as part of the JSON payload
             };
 
-            // If an image is selected, append it to the form data
-            let response;
-            if (selectedImage) {
-                const formData = new FormData();
-                formData.append("text", trimmedMessage);
-                formData.append("image", selectedImage);
-
-                response = await axios.post(`${API_BASE_URL}/api/chat/`, formData, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                });
-            } else {
-                response = await axios.post(`${API_BASE_URL}/api/chat/`, payload, {
-                    headers: { "Content-Type": "application/json" },
-                });
-            }
+            // Send request to backend with JSON payload
+            const response = await axios.post(`${API_BASE_URL}/api/chat/`, payload, {
+                headers: { "Content-Type": "application/json" },
+            });
 
             const { type, data } = response.data;
             let botResponse;
@@ -122,13 +104,6 @@ function Chatbot() {
         }
     };
 
-    const handleImageUpload = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            setSelectedImage(file);
-        }
-    };
-
     const renderMessage = (msg, index) => (
         <div
             key={index}
@@ -150,15 +125,7 @@ function Chatbot() {
                     wordWrap: "break-word",
                 }}
             >
-                {msg.image ? (
-                    <img
-                        src={URL.createObjectURL(msg.image)}
-                        alt="Uploaded by user"
-                        style={{ maxWidth: "100%", borderRadius: "4px" }}
-                    />
-                ) : (
-                    Array.isArray(msg.text) ? msg.text : <p>{msg.text}</p>
-                )}
+                {Array.isArray(msg.text) ? msg.text : <p>{msg.text}</p>}
             </div>
         </div>
     );
@@ -250,27 +217,6 @@ function Chatbot() {
                     >
                         {loading ? "Sending..." : "Send"}
                     </button>
-                    <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        style={{ display: "none" }}
-                        id="image-upload"
-                    />
-                    <label
-                        htmlFor="image-upload"
-                        style={{
-                            padding: "10px 20px",
-                            backgroundColor: "#28a745",
-                            color: "#fff",
-                            border: "none",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            fontSize: "14px",
-                        }}
-                    >
-                        Upload Image
-                    </label>
                 </div>
             </div>
         </div>
