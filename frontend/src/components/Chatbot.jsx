@@ -52,20 +52,31 @@ function Chatbot() {
         setError(null);
 
         try {
-            // Prepare the payload as JSON
-            const payload = {
-                text: trimmedMessage, // Send text as part of the JSON payload
-            };
-
-            // Send request to backend with JSON payload
+            const payload = { text: trimmedMessage };
             const response = await axios.post(`${API_BASE_URL}/api/chat/`, payload, {
                 headers: { "Content-Type": "application/json" },
             });
 
-            const { type, products, data } = response.data; // Updated to include products
+            const { type, message, products, data } = response.data;
             let botResponse;
-            if (type === "chat_response") {
-                botResponse = data;
+
+            if (type === "general_conversation") {
+                botResponse = Array.isArray(message) ? message.join("\n") : "No response available.";
+            } else if (type === "product_recommendations") {
+                botResponse = products.map((product, index) => (
+                    <div key={index}>
+                        <p><strong>Name:</strong> {product.name}</p>
+                        {product.image_url && (
+                            <img
+                                src={product.image_url.startsWith("http")
+                                    ? product.image_url
+                                    : `${API_BASE_URL}${product.image_url}`}
+                                alt={product.name}
+                                style={{ maxWidth: "100px", borderRadius: "4px" }}
+                            />
+                        )}
+                    </div>
+                ));
             } else if (type === "skincare_recommendations") {
                 botResponse = data.map((product, index) => (
                     <div key={index}>
@@ -81,20 +92,9 @@ function Chatbot() {
                         )}
                         {product.image_url && (
                             <img
-                                src={product.image_url}
-                                alt={product.name}
-                                style={{ maxWidth: "100px", borderRadius: "4px" }}
-                            />
-                        )}
-                    </div>
-                ));
-            } else if (type === "product_recommendations") {
-                botResponse = products.map((product, index) => (
-                    <div key={index}>
-                        <p><strong>Name:</strong> {product.name}</p>
-                        {product.image_url && (
-                            <img
-                                src={product.image_url}
+                                src={product.image_url.startsWith("http")
+                                    ? product.image_url
+                                    : `${API_BASE_URL}${product.image_url}`}
                                 alt={product.name}
                                 style={{ maxWidth: "100px", borderRadius: "4px" }}
                             />
@@ -116,7 +116,6 @@ function Chatbot() {
             setLoading(false);
         }
     };
-
 
     const renderMessage = (msg, index) => (
         <div
@@ -146,7 +145,6 @@ function Chatbot() {
 
     return (
         <div style={{ maxWidth: "700px", margin: "0 auto", fontFamily: "Arial, sans-serif", display: "flex", flexDirection: "row" }}>
-            {/* Notes Section */}
             <div style={{ flex: 1, padding: "20px", fontSize: "14px", color: "#555" }}>
                 <h4>How to Get the Best Response:</h4>
                 <ul>
@@ -156,7 +154,6 @@ function Chatbot() {
             </div>
 
             <div style={{ flex: 2 }}>
-                {/* Chat Window */}
                 <div
                     ref={chatRef}
                     style={{
@@ -172,7 +169,6 @@ function Chatbot() {
                     {loading && <p style={{ textAlign: "center", fontStyle: "italic" }}>Bot is typing...</p>}
                 </div>
 
-                {/* Error Message */}
                 {error && (
                     <div style={{ color: "red", marginTop: "10px", textAlign: "center" }}>
                         {error}
@@ -194,14 +190,13 @@ function Chatbot() {
                     </div>
                 )}
 
-                {/* Input Section */}
                 <div style={{ marginTop: "10px", display: "flex", gap: "10px" }}>
                     <input
                         type="text"
                         value={userMessage}
                         onChange={(e) => {
                             setUserMessage(e.target.value);
-                            setError(null); // Clear error when typing
+                            setError(null);
                         }}
                         placeholder="Describe your skin type, concerns, and what kind of product you need."
                         onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
