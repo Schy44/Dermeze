@@ -62,7 +62,7 @@ function Chatbot() {
                 headers: { "Content-Type": "application/json" },
             });
 
-            const { type, data } = response.data;
+            const { type, products, data } = response.data; // Updated to include products
             let botResponse;
             if (type === "chat_response") {
                 botResponse = data;
@@ -88,6 +88,19 @@ function Chatbot() {
                         )}
                     </div>
                 ));
+            } else if (type === "product_recommendations") {
+                botResponse = products.map((product, index) => (
+                    <div key={index}>
+                        <p><strong>Name:</strong> {product.name}</p>
+                        {product.image_url && (
+                            <img
+                                src={product.image_url}
+                                alt={product.name}
+                                style={{ maxWidth: "100px", borderRadius: "4px" }}
+                            />
+                        )}
+                    </div>
+                ));
             } else {
                 botResponse = "I'm sorry, I didn't understand that.";
             }
@@ -103,6 +116,7 @@ function Chatbot() {
             setLoading(false);
         }
     };
+
 
     const renderMessage = (msg, index) => (
         <div
