@@ -1,7 +1,6 @@
-Dermeze
-Dermeze is your personalized skincare advisor, designed to help users feel confident in their skin. It offers advanced AI-powered recommendations for purchasing skincare products tailored to individual needs.
+Dermeze is your personalized skincare advisor, designed to help users feel confident in their skin. It offers AI-powered recommendations for purchasing skincare products tailored to individual needs.
 
-Live Demo(https://dermeze.netlify.app/)
+Live Demo (https://dermeze.netlify.app/)
 
 Test Card Details for Stripe Payments:
 Card Number: 4242 4242 4242 4242
@@ -24,8 +23,7 @@ WebSocket integration to deliver real-time success messages after Stripe payment
 User registration and login functionality.
 Token-based authentication for secure API access.
 5. AI Skin Problem Detection (In Progress)
-Allows users to upload images of skin issues.
-Analyzes images using AI models and suggests suitable skincare products from the available database.
+This feature allows users to upload images of their skin issues for analysis. Once the dataset is fully prepared and all necessary images are collected, the AI model will process the images and recommend suitable skincare products from the available database. The feature will be launched once the dataset is complete
 
 
 Tech Stack
@@ -43,18 +41,19 @@ Installation & Setup
 bash
 Copy code
 git clone https://github.com/Schy44/Dermeze.git  
-cd Dermeze  
+cd Dermeze
+
 2. Install Dependencies
 Backend:
 bash
 Copy code
 pip install -r requirements.txt
-
 Frontend:
 bash
 Copy code
-npm install  
-4. Set Up Environment Variables
+npm install
+
+3. Set Up Environment Variables
 Create a .env file in the root directory and configure the following:
 env
 Copy code
@@ -69,7 +68,7 @@ Copy code
 python manage.py makemigrations  
 python manage.py migrate
  
-6. Start Development Servers
+5. Start Development Servers
 Backend:
 bash
 Copy code
@@ -102,11 +101,12 @@ api/orders/webhook/ [name='stripe-webhook']
 -Miscellaneous
 api/chat/ [name='chat']
 api/media/<path>
+
 Future Enhancements
 Implement advanced caching strategies for improved performance.
 Add localization support to cater to a global user base.
 Ensure accessibility compliance for inclusivity.
-Enable multilingual chatbot responses.
+Better chatbot responses.
 
 Contact
 For inquiries, feel free to reach out at schy4362@gmail.com.
