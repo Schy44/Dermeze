@@ -154,9 +154,9 @@ const CheckoutPage = () => {
                         value={address.phone_number}
                         onChange={handleAddressChange}
                         required
-                        placeholder="e.g. +1234567890"
+
                     />
-                    <small className="phone-format-help">Phone number format: +1234567890 (e.g. +1234567890)</small>
+                    <small className="phone-format-help">Phone number format: +1234567890 </small>
                 </div>
 
                 <h3>Payment Information</h3>

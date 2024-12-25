@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext'; // Import AuthContext for the token
+import axios from 'axios'; // Use axios for API requests
 import '../assets/Cart.css';
 
 const Cart = () => {
@@ -12,39 +13,47 @@ const Cart = () => {
     const [discount, setDiscount] = useState(0);
     const [couponError, setCouponError] = useState('');
 
-    // On Component Mount: Persist cart data from localStorage or initialize empty cart
+    // On Component Mount: Load cart data
     useEffect(() => {
         if (authTokens) {
-            // If the user is logged in, load the cart from the backend or localStorage
+            // If the user is logged in, load the cart from the backend
+            axios.get('/api/cart/') // Fetch cart from backend
+                .then(response => {
+                    const cartData = response.data;
+                    for (let item in cartData) {
+                        addItemToCart({ id: item, ...cartData[item] });
+                    }
+                })
+                .catch(error => console.error("Error fetching cart:", error));
+        } else {
+            // For guest users, load cart from localStorage
             const savedCart = JSON.parse(localStorage.getItem('cart'));
             if (savedCart) {
-                // If there's a cart in localStorage, load it into the state
                 for (let item of savedCart) {
                     addItemToCart(item);
                 }
             }
-        } else {
-            // If not logged in, clear the cart
-            localStorage.removeItem('cart');
         }
     }, [authTokens]);
 
-    // Save cart to localStorage on every change if the user is logged in
+    // Save cart to localStorage on every change if the user is not logged in
     useEffect(() => {
-        if (authTokens && cartItems.length > 0) {
+        if (!authTokens) {
             localStorage.setItem('cart', JSON.stringify(cartItems));
         }
     }, [cartItems, authTokens]);
 
     const handleCouponSubmit = (e) => {
         e.preventDefault();
-        if (couponCode === 'DISCOUNT10') {
-            setDiscount(10);
-            setCouponError('');
-        } else {
-            setDiscount(0);
-            setCouponError('Invalid coupon code');
-        }
+        axios.post('/api/coupon/', { coupon_code: couponCode }) // Send coupon code to backend for validation
+            .then(response => {
+                setDiscount(response.data.discount);
+                setCouponError('');
+            })
+            .catch(error => {
+                setDiscount(0);
+                setCouponError('Invalid coupon code');
+            });
     };
 
     const totalPrice = getTotal();
@@ -97,7 +106,7 @@ const Cart = () => {
                                     <div className="quantity-controls">
                                         <button
                                             onClick={() => item.quantity > 1 && updateQuantity(item.id, item.quantity - 1)}
-                                            disabled={item.quantity === 1} // Prevent going below 1
+                                            disabled={item.quantity === 1}
                                         >
                                             -
                                         </button>

@@ -1,3 +1,4 @@
+import json
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view, permission_classes,action
@@ -55,10 +56,10 @@ from base.services import (
 )
 
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import json
+from django.views.decorators.csrf import csrf_protect
+from django.shortcuts import get_object_or_404
 
-@csrf_exempt
+@csrf_protect  # CSRF protection enabled
 def cart_view(request):
     # Check if the user is authenticated
     if request.user.is_authenticated:
@@ -84,6 +85,12 @@ def cart_view(request):
             product_id = str(data.get('product_id'))
             quantity = data.get('quantity', 1)
 
+            # Validate product ID
+            product = get_object_or_404(Product, id=product_id)
+            if quantity <= 0:
+                return JsonResponse({'error': 'Quantity must be a positive number'}, status=400)
+
+            # Add or update item in the cart
             if product_id in request.session[cart_key]:
                 request.session[cart_key][product_id] += quantity
             else:
@@ -101,6 +108,10 @@ def cart_view(request):
             product_id = str(data.get('product_id'))
             quantity = data.get('quantity', 1)
 
+            if quantity <= 0:
+                return JsonResponse({'error': 'Quantity must be a positive number'}, status=400)
+
+            # Validate product existence
             if product_id in request.session[cart_key]:
                 request.session[cart_key][product_id] = quantity
                 request.session.modified = True
@@ -116,6 +127,7 @@ def cart_view(request):
             data = json.loads(request.body)
             product_id = str(data.get('product_id'))
 
+            # Validate product existence
             if product_id in request.session[cart_key]:
                 del request.session[cart_key][product_id]
                 request.session.modified = True
