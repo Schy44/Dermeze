@@ -65,6 +65,7 @@ function Chatbot() {
             };
 
             // If an image is selected, append it to the form data
+            let response;
             if (selectedImage) {
                 const formData = new FormData();
                 formData.append("text", trimmedMessage);
@@ -115,7 +116,7 @@ function Chatbot() {
             ]);
         } catch (err) {
             console.error("Error sending message:", err);
-            setError(err.response?.data?.error || "Network error. Please try again later.");
+            setError("Network error. Please try again later.");
         } finally {
             setLoading(false);
         }
@@ -163,103 +164,114 @@ function Chatbot() {
     );
 
     return (
-        <div style={{ maxWidth: "500px", margin: "0 auto", fontFamily: "Arial, sans-serif" }}>
-            {/* Chat Window */}
-            <div
-                ref={chatRef}
-                style={{
-                    height: "600px",
-                    overflowY: "auto",
-                    border: "1px solid #ccc",
-                    borderRadius: "8px",
-                    padding: "10px",
-                    backgroundColor: "#f9f9f9",
-                }}
-            >
-                {messages.map(renderMessage)}
-                {loading && <p style={{ textAlign: "center", fontStyle: "italic" }}>Bot is typing...</p>}
+        <div style={{ maxWidth: "700px", margin: "0 auto", fontFamily: "Arial, sans-serif", display: "flex", flexDirection: "row" }}>
+            {/* Notes Section */}
+            <div style={{ flex: 1, padding: "20px", fontSize: "14px", color: "#555" }}>
+                <h4>How to Get the Best Response:</h4>
+                <ul>
+                    <li><strong>For Product Recommendations:</strong> Use a prompt like: "I have oily skin and acne. Recommend a product."</li>
+                    <li><strong>For General Conversation:</strong> You can type anything else for a more general response.</li>
+                </ul>
             </div>
 
-            {/* Error Message */}
-            {error && (
-                <div style={{ color: "red", marginTop: "10px", textAlign: "center" }}>
-                    {error}
-                    <button
+            <div style={{ flex: 2 }}>
+                {/* Chat Window */}
+                <div
+                    ref={chatRef}
+                    style={{
+                        height: "600px",
+                        overflowY: "auto",
+                        border: "1px solid #ccc",
+                        borderRadius: "8px",
+                        padding: "10px",
+                        backgroundColor: "#f9f9f9",
+                    }}
+                >
+                    {messages.map(renderMessage)}
+                    {loading && <p style={{ textAlign: "center", fontStyle: "italic" }}>Bot is typing...</p>}
+                </div>
+
+                {/* Error Message */}
+                {error && (
+                    <div style={{ color: "red", marginTop: "10px", textAlign: "center" }}>
+                        {error}
+                        <button
+                            style={{
+                                marginLeft: "10px",
+                                backgroundColor: "#ff5e57",
+                                color: "#fff",
+                                border: "none",
+                                borderRadius: "4px",
+                                cursor: "pointer",
+                                fontSize: "12px",
+                                padding: "5px 10px",
+                            }}
+                            onClick={() => setError(null)}
+                        >
+                            Dismiss
+                        </button>
+                    </div>
+                )}
+
+                {/* Input Section */}
+                <div style={{ marginTop: "10px", display: "flex", gap: "10px" }}>
+                    <input
+                        type="text"
+                        value={userMessage}
+                        onChange={(e) => {
+                            setUserMessage(e.target.value);
+                            setError(null); // Clear error when typing
+                        }}
+                        placeholder="Describe your skin type, concerns, and what kind of product you need."
+                        onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
                         style={{
-                            marginLeft: "10px",
-                            backgroundColor: "#ff5e57",
+                            flexGrow: 1,
+                            padding: "10px",
+                            borderRadius: "4px",
+                            border: "1px solid #ccc",
+                            fontSize: "14px",
+                        }}
+                        disabled={loading}
+                        aria-label="Chat input"
+                    />
+                    <button
+                        onClick={handleSendMessage}
+                        style={{
+                            padding: "10px 20px",
+                            backgroundColor: loading ? "#aaa" : "#007bff",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "4px",
+                            cursor: loading ? "not-allowed" : "pointer",
+                            fontSize: "14px",
+                        }}
+                        disabled={loading}
+                        aria-label="Send message"
+                    >
+                        {loading ? "Sending..." : "Send"}
+                    </button>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        style={{ display: "none" }}
+                        id="image-upload"
+                    />
+                    <label
+                        htmlFor="image-upload"
+                        style={{
+                            padding: "10px 20px",
+                            backgroundColor: "#28a745",
                             color: "#fff",
                             border: "none",
                             borderRadius: "4px",
                             cursor: "pointer",
-                            fontSize: "12px",
-                            padding: "5px 10px",
+                            fontSize: "14px",
                         }}
-                        onClick={() => setError(null)}
                     >
-                        Dismiss
-                    </button>
+                        Upload Image
+                    </label>
                 </div>
-            )}
-
-            {/* Input Section */}
-            <div style={{ marginTop: "10px", display: "flex", gap: "10px" }}>
-                <input
-                    type="text"
-                    value={userMessage}
-                    onChange={(e) => {
-                        setUserMessage(e.target.value);
-                        setError(null); // Clear error when typing
-                    }}
-                    placeholder="Describe your skin type, concerns, and what kind of product you need."
-                    onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-                    style={{
-                        flexGrow: 1,
-                        padding: "10px",
-                        borderRadius: "4px",
-                        border: "1px solid #ccc",
-                        fontSize: "14px",
-                    }}
-                    disabled={loading}
-                    aria-label="Chat input"
-                />
-                <button
-                    onClick={handleSendMessage}
-                    style={{
-                        padding: "10px 20px",
-                        backgroundColor: loading ? "#aaa" : "#007bff",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: loading ? "not-allowed" : "pointer",
-                        fontSize: "14px",
-                    }}
-                    disabled={loading}
-                    aria-label="Send message"
-                >
-                    {loading ? "Sending..." : "Send"}
-                </button>
-                <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    style={{ display: "none" }}
-                    id="image-upload"
-                />
-                <label
-                    htmlFor="image-upload"
-                    style={{
-                        padding: "10px 20px",
-                        backgroundColor: "#28a745",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                        fontSize: "14px",
-                    }}
-                >
-                    Upload Image
-                </label>
             </div>
         </div>
     );
