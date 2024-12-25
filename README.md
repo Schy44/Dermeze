@@ -1,7 +1,7 @@
 Dermeze
 Dermeze is your personalized skincare advisor, designed to help users feel confident in their skin. It offers advanced AI-powered recommendations for purchasing skincare products tailored to individual needs.
 
-Live Demo
+Live Demo(https://dermeze.netlify.app/)
 
 Test Card Details for Stripe Payments:
 Card Number: 4242 4242 4242 4242
