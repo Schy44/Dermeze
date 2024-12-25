@@ -54,15 +54,6 @@ from base.services import (
     
 )
 
-import nltk
-from nltk.corpus import stopwords
-
-try:
-    stopwords.words('english')
-except LookupError:
-    nltk.download('stopwords')
-
-
 
 
 def custom_404(request, exception):
