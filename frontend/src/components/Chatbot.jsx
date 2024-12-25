@@ -41,6 +41,15 @@ function Chatbot() {
         return id;
     };
 
+    // Clean up object URLs
+    useEffect(() => {
+        return () => {
+            if (selectedImage) {
+                URL.revokeObjectURL(selectedImage);
+            }
+        };
+    }, [selectedImage]);
+
     const handleSendMessage = async () => {
         const trimmedMessage = userMessage.trim();
         if (!trimmedMessage && !selectedImage) return;
@@ -65,9 +74,13 @@ function Chatbot() {
         setError(null);
 
         try {
+<<<<<<< HEAD
             const payload = { text: trimmedMessage };
+=======
+            let response;
+>>>>>>> 239f65d3cbce67a6251c7226d63124d8b16dcc67
 
-            // If an image is selected, append it to the form data
+            // If an image is selected, use FormData for the payload
             if (selectedImage) {
                 const formData = new FormData();
                 formData.append("text", trimmedMessage);
@@ -118,7 +131,7 @@ function Chatbot() {
             ]);
         } catch (err) {
             console.error("Error sending message:", err);
-            setError(err.response?.data?.error || "Network error. Please try again later.");
+            setError(err.response?.data?.error || err.message || "An unknown error occurred.");
         } finally {
             setLoading(false);
         }
@@ -159,7 +172,7 @@ function Chatbot() {
                         style={{ maxWidth: "100%", borderRadius: "4px" }}
                     />
                 ) : (
-                    Array.isArray(msg.text) ? msg.text : <p>{msg.text}</p>
+                    msg.text && (Array.isArray(msg.text) ? msg.text : <p>{msg.text}</p>)
                 )}
             </div>
         </div>
