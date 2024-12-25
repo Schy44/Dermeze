@@ -15,6 +15,7 @@ from datetime import timedelta
 
 import environ
 
+
 # Initialize the environment variable reader
 env = environ.Env()
 environ.Env.read_env()  # This reads the .env file
@@ -159,6 +160,8 @@ DATABASES = {
 }
 
 
+os.environ['NLTK_DATA'] = os.path.join(BASE_DIR, 'nltk_data')  # Adjust BASE_DIR if necessary
+
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
@@ -211,4 +214,4 @@ STRIPE_PUBLISHABLE_KEY = 'pk_test_51QP3LDAGfFENmCUes7k1b8WYOeKpDSndEtX8ATF31K1lP
 
 STRIPE_WEBHOOK_SECRET = 'whsec_C8JnR24pBIwBnG2cvOaC3GRIZr0uGvxa'
 
-GEMINI_API_KEY= "AIzaSyDKsxjrzO2DogDxn5ZpidMBAa-O24-z_OI"
+GEMINI_API_KEY= "AIzaSyBEf6XljFvVNyiI1T7w12mxAE9s2l-xoJc"

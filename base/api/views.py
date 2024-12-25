@@ -48,10 +48,19 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from base.services import (
     configure_genai,
     extract_skincare_details,
-    search_products_by_ingredients,
+    search_products,
+    get_dynamic_keywords,
     generate_gemini_response
+    
 )
 
+import nltk
+from nltk.corpus import stopwords
+
+try:
+    stopwords.words('english')
+except LookupError:
+    nltk.download('stopwords')
 
 
 
@@ -181,56 +190,10 @@ class CategoryListView(generics.ListAPIView):
 class SkinConcernListView(generics.ListCreateAPIView):
     queryset = SkinConcern.objects.all()
     serializer_class = SkinConcernSerializer
-@api_view(["POST"])
-def chat_with_recommendations(request):
-    """
-    Handle chat and skincare recommendations based on user input.
-    """
-    user_text = request.data.get("text", "").strip()
 
-    if not user_text:
-        return Response({"error": "Please provide more details about your skin concerns."}, status=400)
 
-    try:
-        if "recommend a product" in user_text.lower() or "help with my skin" in user_text.lower():
-            skincare_details = extract_skincare_details(user_text)
-            
-            if "error" in skincare_details:
-                return Response({"error": skincare_details["error"]}, status=400)
-            
-            skin_type = skincare_details.get("skin_type")
-            concerns = skincare_details.get("concerns")
-            
-            # Generate ingredients using Gemini API
-            user_concerns_text = f"Suggest ingredients for {skin_type} skin and concerns: {', '.join(concerns)}"
-            ingredients_needed = generate_gemini_response(user_concerns_text)
-            
-            # Search for matching products in the database
-            products = search_products_by_ingredients(ingredients_needed)
-            
-            # Construct a user-friendly response
-            if products:
-                product_list = "\n".join([f"• {product['name']}: {product['description']} (Price: {product['price']})" for product in products])
-                return Response({
-                    "type": "skincare_recommendations",
-                    "message": f"Based on your skin type and concerns, here are some products you may find helpful:\n\n{product_list}"
-                }, status=200)
-            else:
-                return Response({
-                    "type": "skincare_recommendations",
-                    "message": "We couldn't find any products that match your needs right now. Please try again later."
-                }, status=200)
-        
-        # General text-based chat response
-        gemini_response = generate_gemini_response(user_text)
-        return Response({
-            "type": "chat_response",
-            "message": gemini_response
-        }, status=200)
+
     
-    except Exception as e:
-        return Response({"error": f"Something went wrong: {str(e)}"}, status=500)
-
 @require_http_methods(["GET", "POST"])
 def get_payment_status(request, order_id):
     try:
@@ -243,6 +206,60 @@ def get_payment_status(request, order_id):
             return JsonResponse({'status': 'Payment status updated'}, status=200)
     except Order.DoesNotExist:
         return JsonResponse({'error': 'Order not found'}, status=404)
+
+
+@api_view(["POST"])
+def chat_with_recommendations(request):
+    """Handle chat and provide skincare recommendations or general conversation."""
+    user_text = request.data.get("text", "").strip()
+
+    if not user_text:
+        return Response({"error": "Please provide more details about your skin concerns."}, status=400)
+
+    try:
+        # Fetch dynamic keywords
+        dynamic_keywords = get_dynamic_keywords()
+
+        # Extract details from user input
+        skincare_details = extract_skincare_details(user_text, dynamic_keywords)
+
+        if "error" in skincare_details:
+            # Handle general conversation with Gemini API
+            general_response = generate_gemini_response(user_text)
+
+            if isinstance(general_response, str) and general_response.startswith("Error"):
+                return Response({"error": general_response}, status=400)
+
+            return Response({
+                "type": "general_conversation",
+                "message": general_response
+            }, status=200)
+
+        # Process skincare-related input
+        skin_type = skincare_details["skin_type"]
+        concerns = ", ".join(skincare_details["concerns"])
+        product_type = skincare_details["product_type"]
+
+        gemini_prompt = f"Suggest ingredients for {skin_type} skin with concerns: {concerns} for {product_type}"
+        ingredients = generate_gemini_response(gemini_prompt)
+
+        if isinstance(ingredients, str) and ingredients.startswith("Error"):
+            return Response({"error": ingredients}, status=400)
+
+        # Search for products
+        products = search_products(ingredients)
+        if not products:
+            return Response({"message": "No matching products found."}, status=200)
+
+        return Response({
+            "type": "product_recommendations",
+            "count": len(products),
+            "products": products
+        }, status=200)
+
+    except Exception as e:
+        logger.error(f"Unexpected error: {str(e)}", exc_info=True)
+        return Response({"error": f"Something went wrong: {str(e)}"}, status=500)
 
 
 class OrderViewSet(viewsets.ViewSet):

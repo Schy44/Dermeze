@@ -7,6 +7,7 @@ function Chatbot() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [selectedImage, setSelectedImage] = useState(null);
+    const [userId, setUserId] = useState(localStorage.getItem("userId") || generateUserId());
     const chatRef = useRef(null);
 
     const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://dermeze.onrender.com";
@@ -19,18 +20,26 @@ function Chatbot() {
         }
     }, [messages]);
 
-    // Load chat history from localStorage on mount
+    // Load chat history from localStorage based on userId
     useEffect(() => {
-        const savedMessages = localStorage.getItem("chatMessages");
+        const savedMessages = localStorage.getItem(`chatMessages_${userId}`);
         if (savedMessages) {
             setMessages(JSON.parse(savedMessages));
         }
-    }, []);
+    }, [userId]);
 
-    // Save chat history to localStorage on message update
+    // Save chat history to localStorage per userId
     useEffect(() => {
-        localStorage.setItem("chatMessages", JSON.stringify(messages));
-    }, [messages]);
+        if (userId) {
+            localStorage.setItem(`chatMessages_${userId}`, JSON.stringify(messages));
+        }
+    }, [messages, userId]);
+
+    const generateUserId = () => {
+        const id = Math.random().toString(36).substring(2, 15);  // Simple random ID generator
+        localStorage.setItem("userId", id);
+        return id;
+    };
 
     const handleSendMessage = async () => {
         const trimmedMessage = userMessage.trim();
@@ -56,10 +65,7 @@ function Chatbot() {
         setError(null);
 
         try {
-            // Prepare the payload as JSON
-            const payload = {
-                text: trimmedMessage, // Send text as part of the JSON payload
-            };
+            const payload = { text: trimmedMessage };
 
             // If an image is selected, append it to the form data
             if (selectedImage) {
@@ -71,7 +77,6 @@ function Chatbot() {
                     headers: { "Content-Type": "multipart/form-data" },
                 });
             } else {
-                const payload = { text: trimmedMessage };
                 response = await axios.post(`${API_BASE_URL}/api/chat/`, payload, {
                     headers: { "Content-Type": "application/json" },
                 });
@@ -209,7 +214,7 @@ function Chatbot() {
                         setUserMessage(e.target.value);
                         setError(null); // Clear error when typing
                     }}
-                    placeholder="Type a message..."
+                    placeholder="Describe your skin type, concerns, and what kind of product you need."
                     onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
                     style={{
                         flexGrow: 1,

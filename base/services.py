@@ -4,7 +4,12 @@ from django.db.models import Q
 from django.conf import settings
 from .models import Product
 import google.generativeai as genai
+import logging
 
+# Configure logger
+logger = logging.getLogger(__name__)
+
+# Configure Gemini API
 def configure_genai():
     """Configure the Gemini API key."""
     api_key = settings.GEMINI_API_KEY
@@ -12,66 +17,66 @@ def configure_genai():
         raise ValueError("API key not found in settings.")
     genai.configure(api_key=api_key)
 
-def extract_skincare_details(user_input):
-    """
-    Extract skin type and concerns from user input.
-    """
-    skincare_concerns = [
-        "dry skin", "oily skin", "acne", "sensitive skin", 
-        "eczema", "redness", "sunburn", "wrinkles", "dark spots"
-    ]
-    skin_types = ["dry", "oily", "combination", "sensitive"]
-
+def extract_skincare_details(user_input, dynamic_keywords):
+    """Extract skin type, concerns, and product type using simple keyword matching."""
     user_input = user_input.lower()
-    
-    # Extract skin type
-    skin_type = None
-    for stype in skin_types:
-        if stype in user_input:
-            skin_type = stype
-            break
-    
-    # Extract skin concerns
-    concerns = [concern for concern in skincare_concerns if concern in user_input]
 
-    if not skin_type and not concerns:
-        return {"error": "Could not identify your skin type or concerns. Please provide more specific information."}
-    
-    return {"skin_type": skin_type, "concerns": concerns}
+    skin_type = next((word for word in dynamic_keywords["skin_types"] if word in user_input), None)
+    product_type = next((word for word in dynamic_keywords["product_types"] if word in user_input), None)
+    concerns = [word for word in dynamic_keywords["concerns"] if word in user_input]
 
-def search_products_by_ingredients(ingredients):
-    """
-    Search for products matching the suggested ingredients in the database.
-    """
+    if not (skin_type or product_type or concerns):
+        return {"error": "Could not detect any skin type, concern, or product type. Please provide more details."}
+
+    return {
+        "skin_type": skin_type,
+        "product_type": product_type,
+        "concerns": concerns,
+    }
+
+
+def get_dynamic_keywords():
+    """Fetch dynamic keywords from the database."""
+    categories = Product.objects.values_list("category", flat=True).distinct()
+    ingredients = Product.objects.values_list("ingredients", flat=True).distinct()
+    concerns = ["acne", "redness", "wrinkles", "eczema", "dark spots", "sunburn"]
+
+    return {
+        "skin_types": [str(category).lower() for category in categories],
+        "product_types": ["sunscreen", "cleanser", "serum", "moisturizer", "toner"],
+        "concerns": [str(concern).lower() for concern in concerns],
+        "ingredients": [str(ingredient).lower() for ingredient in ingredients],
+    }
+
+
+# Search products by ingredients
+def search_products(ingredients):
+    """Search for products matching ingredients."""
     if not ingredients:
-        return [{"message": "No matching ingredients provided."}]
-    
+        return []
+
     query = Q()
     for ingredient in ingredients:
-        query |= Q(ingredients__icontains=ingredient)
-    
-    products = Product.objects.filter(query).distinct()[:10]  # Limit results
+        query |= Q(ingredients__icontains=ingredient.strip())
+
+    products = Product.objects.filter(query).distinct()[:10]
     return [
         {
             "name": product.name,
-            "description": product.description,
-            "price": product.price,
-            "ingredients": product.ingredients,
             "image_url": product.image.url if product.image else None,
         }
         for product in products
-    ] if products.exists() else [{"message": "No matching products found."}]
+    ]
 
-def generate_gemini_response(user_input):
-    """
-    Use Gemini API to determine suitable ingredients/products for skincare concerns.
-    """
+# Generate Gemini response
+def generate_gemini_response(user_text):
+    """Generate a response using the Gemini API."""
     try:
         configure_genai()
         model = genai.GenerativeModel("gemini-1.5-flash")
-        response = model.generate_content(user_input)
-        return response.text.split(",")  # Assuming Gemini returns ingredients as comma-separated values
-    except genai.APIError as e:
-        return f"Gemini API error: {str(e)}"
+        response = model.generate_content(user_text)
+        return response.text.split(",")  # Assume response is a comma-separated list of ingredients
     except Exception as e:
-        return f"Unexpected error: {str(e)}"
+        logger.error(f"Gemini API Error: {str(e)}")
+        return f"Error: {str(e)}"
+
