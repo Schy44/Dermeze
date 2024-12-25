@@ -74,11 +74,7 @@ function Chatbot() {
         setError(null);
 
         try {
-<<<<<<< HEAD
             const payload = { text: trimmedMessage };
-=======
-            let response;
->>>>>>> 239f65d3cbce67a6251c7226d63124d8b16dcc67
 
             // If an image is selected, use FormData for the payload
             if (selectedImage) {
