@@ -29,10 +29,19 @@ const LoginPage = () => {
 
             // Redirect to home page after successful login
             navigate('/');  // This will redirect to the '/' route (home page)
-            setLoading(false);
         } catch (err) {
-            setError('Login failed. Please check your credentials.');
-            setLoading(false);
+            console.error(err);  // Log the error for debugging
+
+            // Check for different types of errors and provide custom messages
+            if (err.response && err.response.status === 401) {
+                setError('Incorrect password. Please try again.');
+            } else if (err.response && err.response.status === 404) {
+                setError('No user found with that username.');
+            } else {
+                setError('Login failed. Please check your credentials.');
+            }
+        } finally {
+            setLoading(false);  // Make sure loading is set to false after the attempt
         }
     };
 
