@@ -80,7 +80,7 @@ const CheckoutPage = () => {
 
         try {
             // Call the backend to create a payment intent
-            const data = await fetchWithAuth(' https://dermeze.onrender.com/api/orders/checkout/', {
+            const data = await fetchWithAuth('https://dermeze.onrender.com/api/orders/checkout/', {
                 method: 'POST',
                 body: JSON.stringify(orderData),
             }, authTokens);
@@ -154,13 +154,23 @@ const CheckoutPage = () => {
                         value={address.phone_number}
                         onChange={handleAddressChange}
                         required
+                        placeholder="e.g. +1234567890"
                     />
+                    <small className="phone-format-help">Phone number format: +1234567890 (e.g. +1234567890)</small>
                 </div>
 
                 <h3>Payment Information</h3>
                 <div className="form-group">
                     <label>Card Details:</label>
                     <CardElement />
+                    <small className="card-format-help">
+                        Test Card Details:
+                        <br />
+                        Card Number: 4242 4242 4242 4242 <br />
+                        Expiry Date: 12/24 <br />
+                        CVC: 123 <br />
+                        ZIP Code: 12345
+                    </small>
                 </div>
 
                 {error && <p className="error-message">{error}</p>}

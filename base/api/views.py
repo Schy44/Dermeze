@@ -64,7 +64,7 @@ def cart_view(request):
     if request.user.is_authenticated:
         # Use user-specific cart logic (by user ID)
         user_id = request.user.id
-        cart_key = f'cart_{user_id}'
+        cart_key = f'cart_{user_id}'  # Unique cart key based on user ID
     else:
         # For guests, store cart in the session with a generic key
         cart_key = 'cart'
@@ -126,7 +126,6 @@ def cart_view(request):
             return JsonResponse({'error': 'Invalid request data'}, status=400)
 
     return JsonResponse({'error': 'Invalid request method'}, status=400)
-
 
 def custom_404(request, exception):
     return render(request, '404.html', status=404)
