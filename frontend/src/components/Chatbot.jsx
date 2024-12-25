@@ -8,9 +8,6 @@ function Chatbot() {
     const [error, setError] = useState(null);
     const chatRef = useRef(null);
 
-    const userId = localStorage.getItem("userId") || Math.random().toString(36).substr(2, 9); // Unique user ID (if not present in localStorage)
-    localStorage.setItem("userId", userId); // Save to localStorage for session persistence
-
     const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://dermeze.onrender.com";
     const MAX_MESSAGE_LENGTH = 500;
 
@@ -20,19 +17,6 @@ function Chatbot() {
             chatRef.current.scrollTop = chatRef.current.scrollHeight;
         }
     }, [messages]);
-
-    // Load chat history from localStorage on mount based on userId
-    useEffect(() => {
-        const savedMessages = localStorage.getItem(`chatMessages_${userId}`);
-        if (savedMessages) {
-            setMessages(JSON.parse(savedMessages));
-        }
-    }, [userId]);
-
-    // Save chat history to localStorage on message update
-    useEffect(() => {
-        localStorage.setItem(`chatMessages_${userId}`, JSON.stringify(messages));
-    }, [messages, userId]);
 
     const handleSendMessage = async () => {
         const trimmedMessage = userMessage.trim();

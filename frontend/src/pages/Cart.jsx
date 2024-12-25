@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext'; // Import AuthContext for the token
@@ -7,10 +7,24 @@ import '../assets/Cart.css';
 const Cart = () => {
     const { authTokens } = useContext(AuthContext); // Access authTokens
     const navigate = useNavigate();
-    const { cartItems, removeFromCart, updateQuantity, getTotal } = useCart();
+    const { cartItems, setCartItems, removeFromCart, updateQuantity, getTotal } = useCart();
     const [couponCode, setCouponCode] = useState('');
     const [discount, setDiscount] = useState(0);
     const [couponError, setCouponError] = useState('');
+
+    // Fetch user-specific cart on component mount
+    useEffect(() => {
+        if (authTokens) {
+            fetch('/api/cart', {
+                headers: {
+                    'Authorization': `Bearer ${authTokens}`,
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => setCartItems(data.cartItems))
+                .catch((error) => console.error('Error fetching cart:', error));
+        }
+    }, [authTokens, setCartItems]);
 
     const handleCouponSubmit = (e) => {
         e.preventDefault();
@@ -32,29 +46,40 @@ const Cart = () => {
             return;
         }
 
-        // Ensure the user is logged in
         if (!authTokens) {
             alert('You are not logged in.');
-            navigate('/login'); // Redirect to login if no token
+            navigate('/login');
             return;
         }
 
-        // Map cart items to the required format for the backend
         const orderItems = cartItems.map((item) => ({
-            product_id: item.id, // Ensure this field matches what your backend expects
+            product_id: item.id,
             quantity: item.quantity,
         }));
 
-        navigate('/checkoutpage', { state: { cart_items: orderItems } });
+        fetch('/api/checkout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authTokens}`,
+            },
+            body: JSON.stringify({ orderItems }),
+        })
+            .then((response) => {
+                if (response.ok) {
+                    navigate('/checkoutpage');
+                } else {
+                    console.error('Error during checkout:', response.statusText);
+                }
+            })
+            .catch((error) => console.error('Error during checkout:', error));
     };
 
     return (
         <div className="cart-container">
-            {/* Discount Code Banner */}
             <div className="discount-banner">
                 Use code <strong>DISCOUNT10</strong> for 10% off your total!
             </div>
-
             <h2>Cart</h2>
             {cartItems.length === 0 ? (
                 <p>Your cart is empty.</p>
@@ -73,7 +98,7 @@ const Cart = () => {
                                     <div className="quantity-controls">
                                         <button
                                             onClick={() => item.quantity > 1 && updateQuantity(item.id, item.quantity - 1)}
-                                            disabled={item.quantity === 1} // Prevent going below 1
+                                            disabled={item.quantity === 1}
                                         >
                                             -
                                         </button>
