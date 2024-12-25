@@ -7,8 +7,10 @@ function Chatbot() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [selectedImage, setSelectedImage] = useState(null);
-    const [userId, setUserId] = useState(localStorage.getItem("userId") || generateUserId());
     const chatRef = useRef(null);
+
+    const userId = localStorage.getItem("userId") || Math.random().toString(36).substr(2, 9); // Unique user ID (if not present in localStorage)
+    localStorage.setItem("userId", userId); // Save to localStorage for session persistence
 
     const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://dermeze.onrender.com";
     const MAX_MESSAGE_LENGTH = 500;
@@ -20,7 +22,7 @@ function Chatbot() {
         }
     }, [messages]);
 
-    // Load chat history from localStorage based on userId
+    // Load chat history from localStorage on mount based on userId
     useEffect(() => {
         const savedMessages = localStorage.getItem(`chatMessages_${userId}`);
         if (savedMessages) {
@@ -28,27 +30,10 @@ function Chatbot() {
         }
     }, [userId]);
 
-    // Save chat history to localStorage per userId
+    // Save chat history to localStorage on message update
     useEffect(() => {
-        if (userId) {
-            localStorage.setItem(`chatMessages_${userId}`, JSON.stringify(messages));
-        }
+        localStorage.setItem(`chatMessages_${userId}`, JSON.stringify(messages));
     }, [messages, userId]);
-
-    const generateUserId = () => {
-        const id = Math.random().toString(36).substring(2, 15);  // Simple random ID generator
-        localStorage.setItem("userId", id);
-        return id;
-    };
-
-    // Clean up object URLs
-    useEffect(() => {
-        return () => {
-            if (selectedImage) {
-                URL.revokeObjectURL(selectedImage);
-            }
-        };
-    }, [selectedImage]);
 
     const handleSendMessage = async () => {
         const trimmedMessage = userMessage.trim();
@@ -74,9 +59,12 @@ function Chatbot() {
         setError(null);
 
         try {
-            const payload = { text: trimmedMessage };
+            // Prepare the payload as JSON
+            const payload = {
+                text: trimmedMessage, // Send text as part of the JSON payload
+            };
 
-            // If an image is selected, use FormData for the payload
+            // If an image is selected, append it to the form data
             if (selectedImage) {
                 const formData = new FormData();
                 formData.append("text", trimmedMessage);
@@ -127,7 +115,7 @@ function Chatbot() {
             ]);
         } catch (err) {
             console.error("Error sending message:", err);
-            setError(err.response?.data?.error || err.message || "An unknown error occurred.");
+            setError(err.response?.data?.error || "Network error. Please try again later.");
         } finally {
             setLoading(false);
         }
@@ -168,7 +156,7 @@ function Chatbot() {
                         style={{ maxWidth: "100%", borderRadius: "4px" }}
                     />
                 ) : (
-                    msg.text && (Array.isArray(msg.text) ? msg.text : <p>{msg.text}</p>)
+                    Array.isArray(msg.text) ? msg.text : <p>{msg.text}</p>
                 )}
             </div>
         </div>
