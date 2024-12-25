@@ -60,51 +60,70 @@ import json
 
 @csrf_exempt
 def cart_view(request):
-    if 'cart' not in request.session:
-        request.session['cart'] = {}
+    # Check if the user is authenticated
+    if request.user.is_authenticated:
+        # Use user-specific cart logic (by user ID)
+        user_id = request.user.id
+        cart_key = f'cart_{user_id}'
+    else:
+        # For guests, store cart in the session with a generic key
+        cart_key = 'cart'
+
+    # Initialize the cart if it doesn't exist
+    if cart_key not in request.session:
+        request.session[cart_key] = {}
 
     if request.method == 'GET':
-        # Retrieve the cart
-        return JsonResponse(request.session['cart'], safe=False)
+        # Retrieve the cart for the authenticated user or guest
+        return JsonResponse(request.session[cart_key], safe=False)
 
     elif request.method == 'POST':
         # Add an item to the cart
-        data = json.loads(request.body)
-        product_id = str(data.get('product_id'))
-        quantity = data.get('quantity', 1)
+        try:
+            data = json.loads(request.body)
+            product_id = str(data.get('product_id'))
+            quantity = data.get('quantity', 1)
 
-        if product_id in request.session['cart']:
-            request.session['cart'][product_id] += quantity
-        else:
-            request.session['cart'][product_id] = quantity
+            if product_id in request.session[cart_key]:
+                request.session[cart_key][product_id] += quantity
+            else:
+                request.session[cart_key][product_id] = quantity
 
-        request.session.modified = True
-        return JsonResponse({'message': 'Item added to cart'})
+            request.session.modified = True
+            return JsonResponse({'message': 'Item added to cart'})
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid request data'}, status=400)
 
     elif request.method == 'PUT':
-        # Update item quantity
-        data = json.loads(request.body)
-        product_id = str(data.get('product_id'))
-        quantity = data.get('quantity', 1)
+        # Update item quantity in the cart
+        try:
+            data = json.loads(request.body)
+            product_id = str(data.get('product_id'))
+            quantity = data.get('quantity', 1)
 
-        if product_id in request.session['cart']:
-            request.session['cart'][product_id] = quantity
-            request.session.modified = True
-            return JsonResponse({'message': 'Cart updated'})
-        else:
-            return JsonResponse({'error': 'Product not in cart'}, status=404)
+            if product_id in request.session[cart_key]:
+                request.session[cart_key][product_id] = quantity
+                request.session.modified = True
+                return JsonResponse({'message': 'Cart updated'})
+            else:
+                return JsonResponse({'error': 'Product not in cart'}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid request data'}, status=400)
 
     elif request.method == 'DELETE':
         # Remove an item from the cart
-        data = json.loads(request.body)
-        product_id = str(data.get('product_id'))
+        try:
+            data = json.loads(request.body)
+            product_id = str(data.get('product_id'))
 
-        if product_id in request.session['cart']:
-            del request.session['cart'][product_id]
-            request.session.modified = True
-            return JsonResponse({'message': 'Item removed from cart'})
-        else:
-            return JsonResponse({'error': 'Product not in cart'}, status=404)
+            if product_id in request.session[cart_key]:
+                del request.session[cart_key][product_id]
+                request.session.modified = True
+                return JsonResponse({'message': 'Item removed from cart'})
+            else:
+                return JsonResponse({'error': 'Product not in cart'}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid request data'}, status=400)
 
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 

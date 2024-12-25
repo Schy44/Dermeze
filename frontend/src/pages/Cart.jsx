@@ -7,29 +7,34 @@ import '../assets/Cart.css';
 const Cart = () => {
     const { authTokens } = useContext(AuthContext); // Access authTokens
     const navigate = useNavigate();
-    const { cartItems, removeFromCart, updateQuantity, getTotal } = useCart();
+    const { cartItems, removeFromCart, updateQuantity, getTotal, addItemToCart } = useCart();
     const [couponCode, setCouponCode] = useState('');
     const [discount, setDiscount] = useState(0);
     const [couponError, setCouponError] = useState('');
 
-    // On Component Mount: Persist cart data from sessionStorage or initialize empty cart
+    // On Component Mount: Persist cart data from localStorage or initialize empty cart
     useEffect(() => {
-        const savedCart = JSON.parse(sessionStorage.getItem('cart'));
-        if (savedCart) {
-            // If there's a cart in sessionStorage, load it into the state
-            for (let item of savedCart) {
-                // Add saved items to the context or local state
-                addItemToCart(item);
+        if (authTokens) {
+            // If the user is logged in, load the cart from the backend or localStorage
+            const savedCart = JSON.parse(localStorage.getItem('cart'));
+            if (savedCart) {
+                // If there's a cart in localStorage, load it into the state
+                for (let item of savedCart) {
+                    addItemToCart(item);
+                }
             }
+        } else {
+            // If not logged in, clear the cart
+            localStorage.removeItem('cart');
         }
-    }, []);
+    }, [authTokens]);
 
-    // Save cart to sessionStorage on every change
+    // Save cart to localStorage on every change if the user is logged in
     useEffect(() => {
-        if (cartItems.length > 0) {
-            sessionStorage.setItem('cart', JSON.stringify(cartItems));
+        if (authTokens && cartItems.length > 0) {
+            localStorage.setItem('cart', JSON.stringify(cartItems));
         }
-    }, [cartItems]);
+    }, [cartItems, authTokens]);
 
     const handleCouponSubmit = (e) => {
         e.preventDefault();
