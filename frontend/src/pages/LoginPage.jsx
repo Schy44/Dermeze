@@ -25,7 +25,7 @@ const LoginPage = () => {
         setLoading(false);
 
         // After successful login, redirect to the main app page
-        navigate('https://dermeze.netlify.app/');  // Redirect to the desired URL
+        navigate('/');  // Redirect to the desired URL
     };
 
     return (
