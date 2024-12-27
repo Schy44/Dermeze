@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../assets/Register.css';
 
 const RegisterPage = () => {
     const navigate = useNavigate();
     const [username, setUsername] = useState('');
-    const [email, setEmail] = useState(''); // State for email
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -13,7 +13,6 @@ const RegisterPage = () => {
     const handleRegister = async (e) => {
         e.preventDefault();
 
-        // Basic validation
         if (!username || !email || !password) {
             setError('Please fill out all fields.');
             return;
@@ -23,22 +22,22 @@ const RegisterPage = () => {
         setError('');
 
         try {
-            const response = await fetch(' https://dermeze.onrender.com/api/register/', {
+            const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/register/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, email, password }), // Include email in the request body
+                body: JSON.stringify({ username, email, password }),
             });
 
             if (!response.ok) {
-                throw new Error('Registration failed');
+                const data = await response.json();
+                throw new Error(data.detail || 'Registration failed.');
             }
 
-            // Redirect to login page after successful registration
-            navigate('/login');
-        } catch (error) {
-            setError(error.message);
+            navigate('/login'); // Redirect to login on success
+        } catch (err) {
+            setError(err.message);
         } finally {
             setLoading(false);
         }
@@ -60,7 +59,7 @@ const RegisterPage = () => {
                     />
                 </div>
                 <div className="inputGroup">
-                    <label htmlFor="email">Email:</label> {/* Email field */}
+                    <label htmlFor="email">Email:</label>
                     <input
                         type="email"
                         id="email"
@@ -86,10 +85,7 @@ const RegisterPage = () => {
                 </button>
             </form>
         </div>
-
     );
 };
-
-
 
 export default RegisterPage;
