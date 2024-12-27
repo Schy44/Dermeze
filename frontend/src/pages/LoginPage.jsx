@@ -4,7 +4,7 @@ import AuthContext from '../context/AuthContext';
 import '../assets/Login.css';
 
 const LoginPage = () => {
-    const { loginUser, error } = useContext(AuthContext); // Access error from context
+    const { loginUser, error } = useContext(AuthContext); // Access `error` from context
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -19,7 +19,7 @@ const LoginPage = () => {
             return;
         }
 
-        await loginUser({ username, password }); // Login and handle redirection in context
+        await loginUser({ username, password }); // Call loginUser
         setLoading(false);
     };
 
@@ -27,7 +27,7 @@ const LoginPage = () => {
         <div className="login-container">
             <h2>Login</h2>
             <form onSubmit={handleSubmit} className="form">
-                {error && <p className="error">{error}</p>}
+                {error && <p className="error">{error}</p>} {/* Display error */}
                 <div className="inputGroup">
                     <label htmlFor="username">Username:</label>
                     <input

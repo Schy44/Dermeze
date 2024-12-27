@@ -42,8 +42,6 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const loginUser = async ({ username, password }) => {
-        setLoading(true);
-        setError(null);
         try {
             const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/token/`, {
                 method: 'POST',
@@ -51,23 +49,24 @@ export const AuthProvider = ({ children }) => {
                 body: JSON.stringify({ username, password }),
             });
 
-            if (response.ok) {
+            if (!response.ok) {
                 const data = await response.json();
-                localStorage.setItem('authTokens', JSON.stringify(data));
-                setAuthTokens(data);
-                setUser(jwtDecode(data.access));
-                navigate('/home');
-            } else {
-                const errorData = await response.json();
-                setError(errorData.detail || 'Invalid credentials');
+                throw new Error(data.detail || 'Login failed');
             }
-        } catch (error) {
-            console.error('Login failed:', error);
-            setError('Unable to connect to the server. Please try again later.');
-        } finally {
-            setLoading(false);
+
+            const data = await response.json();
+            setAuthTokens(data);
+            setUser(jwt_decode(data.access));
+            localStorage.setItem('authTokens', JSON.stringify(data));
+
+            // Redirect only on successful login
+            navigate('/');
+        } catch (err) {
+            console.error(err);
+            setError(err.message); // Set error message in state
         }
     };
+
 
     const logoutUser = () => {
         localStorage.removeItem('authTokens');
