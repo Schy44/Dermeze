@@ -11,17 +11,6 @@ export const AuthProvider = ({ children }) => {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
-    // Refresh tokens 1 minute before expiry
-    useEffect(() => {
-        const interval = setInterval(() => {
-            if (authTokens && !isTokenExpired(authTokens.access)) {
-                updateToken();
-            }
-        }, 1000 * 60); // Every 1 minute
-
-        return () => clearInterval(interval); // Cleanup interval on component unmount
-    }, [authTokens]);
-
     useEffect(() => {
         const tokens = localStorage.getItem('authTokens');
         if (tokens) {
@@ -33,15 +22,26 @@ export const AuthProvider = ({ children }) => {
                 } else {
                     localStorage.removeItem('authTokens');
                 }
-            } catch (error) {
-                console.error('Error parsing tokens:', error);
+            } catch (err) {
+                console.error('Error parsing tokens:', err);
                 localStorage.removeItem('authTokens');
             }
         }
         setLoading(false);
     }, []);
 
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (authTokens && !isTokenExpired(authTokens.access)) {
+                updateToken();
+            }
+        }, 1000 * 60); // Refresh tokens every minute if valid
+
+        return () => clearInterval(interval);
+    }, [authTokens]);
+
     const loginUser = async ({ username, password }) => {
+        setError(null);
         try {
             const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/token/`, {
                 method: 'POST',
@@ -49,24 +49,21 @@ export const AuthProvider = ({ children }) => {
                 body: JSON.stringify({ username, password }),
             });
 
+            const data = await response.json();
+
             if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.detail || 'Login failed');
+                throw new Error(data.detail || 'Invalid credentials');
             }
 
-            const data = await response.json();
-            setAuthTokens(data);
-            setUser(jwt_decode(data.access));
             localStorage.setItem('authTokens', JSON.stringify(data));
-
-            // Redirect only on successful login
-            navigate('/');
+            setAuthTokens(data);
+            setUser(jwtDecode(data.access));
+            navigate('/home');
         } catch (err) {
-            console.error(err);
-            setError(err.message); // Set error message in state
+            console.error('Login error:', err.message);
+            setError(err.message);
         }
     };
-
 
     const logoutUser = () => {
         localStorage.removeItem('authTokens');
@@ -88,17 +85,16 @@ export const AuthProvider = ({ children }) => {
                 body: JSON.stringify({ refresh: authTokens.refresh }),
             });
 
-            if (response.ok) {
-                const data = await response.json();
-                localStorage.setItem('authTokens', JSON.stringify(data));
-                setAuthTokens(data);
-                setUser(jwtDecode(data.access));
-            } else {
-                console.error('Failed to refresh token:', response.statusText);
-                logoutUser();
+            if (!response.ok) {
+                throw new Error('Failed to refresh token');
             }
-        } catch (error) {
-            console.error('Unexpected error during token refresh:', error);
+
+            const data = await response.json();
+            localStorage.setItem('authTokens', JSON.stringify(data));
+            setAuthTokens(data);
+            setUser(jwtDecode(data.access));
+        } catch (err) {
+            console.error('Token refresh error:', err.message);
             logoutUser();
         }
     };
@@ -111,6 +107,7 @@ export const AuthProvider = ({ children }) => {
                 loginUser,
                 logoutUser,
                 updateToken,
+                fetchWithAuth, // Include fetchWithAuth in context
                 error,
             }}
         >
@@ -119,12 +116,41 @@ export const AuthProvider = ({ children }) => {
     );
 };
 
+export const fetchWithAuth = async (url, options = {}, authTokens, updateToken) => {
+    if (!authTokens || !authTokens.access) {
+        throw new Error('Authorization token is missing');
+    }
+
+    if (isTokenExpired(authTokens.access)) {
+        await updateToken();
+    }
+
+    const headers = {
+        ...options.headers,
+        Authorization: `Bearer ${authTokens.access}`,
+        'Content-Type': 'application/json',
+    };
+
+    try {
+        const response = await fetch(url, { ...options, headers });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || `HTTP error! Status: ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (err) {
+        console.error(`Error fetching data from ${url}:`, err.message);
+        throw new Error(err.message);
+    }
+};
+
 export const isTokenExpired = (token) => {
     try {
         const { exp } = jwtDecode(token);
         return Date.now() >= exp * 1000;
-    } catch (error) {
-        console.error('Error decoding token:', error);
+    } catch (err) {
+        console.error('Error decoding token:', err.message);
         return true;
     }
 };
