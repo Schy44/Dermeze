@@ -8,6 +8,7 @@ const LoginPage = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();  // Initialize navigate
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -19,8 +20,12 @@ const LoginPage = () => {
             return;
         }
 
-        await loginUser({ username, password }); // Call loginUser
+        // Call loginUser and redirect on success
+        await loginUser({ username, password });
         setLoading(false);
+
+        // After successful login, redirect to the main app page
+        navigate('https://dermeze.netlify.app/');  // Redirect to the desired URL
     };
 
     return (
@@ -53,7 +58,7 @@ const LoginPage = () => {
                 </button>
                 <button
                     type="button"
-                    onClick={() => navigate('/register')}
+                    onClick={() => navigate('/register')}  // Navigate to register page
                     className="registerButton"
                 >
                     Register
