@@ -29,6 +29,7 @@
 
 ### Bonus Features
 - **Real-Time Features**: WebSocket integration for live notifications.
+- **Email - verification**: For forget password Email Recovery(Frontend isnt ready yet)
 - **Auto-Deployment**: GitHub-based deployment pipeline.
 - **Milestone-Based Completion**: Trackable progress and goals.
 
