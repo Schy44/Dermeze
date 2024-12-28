@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../assets/Register.css';
 
@@ -13,6 +13,7 @@ const RegisterPage = () => {
     const handleRegister = async (e) => {
         e.preventDefault();
 
+        // Basic validation
         if (!username || !email || !password) {
             setError('Please fill out all fields.');
             return;
@@ -22,33 +23,35 @@ const RegisterPage = () => {
         setError('');
 
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/register/`, {
+            const response = await fetch('https://dermeze.onrender.com/api/register/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, email, password }),
+                body: JSON.stringify({ username, email, password }), // Include email in the request body
             });
 
+            // Check for non-2xx status codes
             if (!response.ok) {
-
                 const contentType = response.headers.get('content-type');
                 if (contentType && contentType.includes('application/json')) {
                     const data = await response.json();
                     throw new Error(data.detail || 'Registration failed.');
                 } else {
+                    const text = await response.text();
+                    console.error('Unexpected Response:', text);
                     throw new Error('Unexpected response from the server.');
                 }
             }
 
-            navigate('/login'); // Redirect to login on success
-        } catch (err) {
-            setError(err.message);
+            // Redirect to login page after successful registration
+            navigate('/login');
+        } catch (error) {
+            setError(error.message);
         } finally {
             setLoading(false);
         }
     };
-
 
     return (
         <div className="register-container">
@@ -66,7 +69,7 @@ const RegisterPage = () => {
                     />
                 </div>
                 <div className="inputGroup">
-                    <label htmlFor="email">Email:</label>
+                    <label htmlFor="email">Email:</label> {/* Email field */}
                     <input
                         type="email"
                         id="email"

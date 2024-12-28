@@ -59,38 +59,34 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_protect
 from django.shortcuts import get_object_or_404
 
-@csrf_protect  # CSRF protection enabled
+@csrf_protect  
 def cart_view(request):
-    # Check if the user is authenticated
     if request.user.is_authenticated:
-        # Use user-specific cart logic (by user ID)
         user_id = request.user.id
-        cart_key = f'cart_{user_id}'  # Unique cart key based on user ID
+        cart_key = f'cart_{user_id}' 
     else:
-        # For guests, store cart in the session with a generic key
+        
         cart_key = 'cart'
 
-    # Initialize the cart if it doesn't exist
     if cart_key not in request.session:
         request.session[cart_key] = {}
 
     if request.method == 'GET':
-        # Retrieve the cart for the authenticated user or guest
         return JsonResponse(request.session[cart_key], safe=False)
 
     elif request.method == 'POST':
-        # Add an item to the cart
+    
         try:
             data = json.loads(request.body)
             product_id = str(data.get('product_id'))
             quantity = data.get('quantity', 1)
 
-            # Validate product ID
+
             product = get_object_or_404(Product, id=product_id)
             if quantity <= 0:
                 return JsonResponse({'error': 'Quantity must be a positive number'}, status=400)
 
-            # Add or update item in the cart
+    
             if product_id in request.session[cart_key]:
                 request.session[cart_key][product_id] += quantity
             else:
@@ -102,7 +98,7 @@ def cart_view(request):
             return JsonResponse({'error': 'Invalid request data'}, status=400)
 
     elif request.method == 'PUT':
-        # Update item quantity in the cart
+        
         try:
             data = json.loads(request.body)
             product_id = str(data.get('product_id'))
@@ -111,7 +107,7 @@ def cart_view(request):
             if quantity <= 0:
                 return JsonResponse({'error': 'Quantity must be a positive number'}, status=400)
 
-            # Validate product existence
+        
             if product_id in request.session[cart_key]:
                 request.session[cart_key][product_id] = quantity
                 request.session.modified = True
@@ -122,12 +118,12 @@ def cart_view(request):
             return JsonResponse({'error': 'Invalid request data'}, status=400)
 
     elif request.method == 'DELETE':
-        # Remove an item from the cart
+    
         try:
             data = json.loads(request.body)
             product_id = str(data.get('product_id'))
 
-            # Validate product existence
+        
             if product_id in request.session[cart_key]:
                 del request.session[cart_key][product_id]
                 request.session.modified = True
