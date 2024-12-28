@@ -31,8 +31,14 @@ const RegisterPage = () => {
             });
 
             if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.detail || 'Registration failed.');
+
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    const data = await response.json();
+                    throw new Error(data.detail || 'Registration failed.');
+                } else {
+                    throw new Error('Unexpected response from the server.');
+                }
             }
 
             navigate('/login'); // Redirect to login on success
@@ -42,6 +48,7 @@ const RegisterPage = () => {
             setLoading(false);
         }
     };
+
 
     return (
         <div className="register-container">
